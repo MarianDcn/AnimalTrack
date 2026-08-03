@@ -1,6 +1,6 @@
 import { Type } from 'class-transformer';
 import { IsDate, IsEnum, IsOptional, IsString, IsUUID, MinLength } from 'class-validator';
-import { SexPasare, StatusPasare } from '../../../generated/prisma/enums';
+import { SexPasare, StatusPasare } from '../../generated/prisma/enums';
 
 export class CreatePasareDto {
   @IsString()

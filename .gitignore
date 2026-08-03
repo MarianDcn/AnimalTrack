@@ -7,7 +7,7 @@ build/
 dist-ssr/
 
 # Prisma generated client (regenerat cu `npx prisma generate`)
-backend/generated/
+backend/src/generated/
 
 # Environment variables (contin secrete / connection strings reale)
 .env
