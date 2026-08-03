@@ -1,0 +1,164 @@
+// Prisma schema - AnimalTrack
+// Etapa 1: Ferma, Utilizator, Pasare, Pereche, SerieCuibarit, Ou, Fotografie
+// Arhitectura este multi-tenant: fiecare rand relevant are ferma_id si este
+// izolat per ferma la nivel de aplicatie (vezi PrismaService / guards in modulul auth).
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum RolUtilizator {
+  ADMIN
+  ANGAJAT
+}
+
+enum SexPasare {
+  MASCUL
+  FEMELA
+  NECUNOSCUT
+}
+
+enum StatusPasare {
+  ACTIVA
+  VANDUTA
+  DECEDATA
+  TRANSFERATA
+}
+
+enum StatusPereche {
+  ACTIVA
+  SEPARATA
+  ARHIVATA
+}
+
+enum StatusOu {
+  DEPUS
+  FECUNDAT
+  NEFECUNDAT
+  ECLOZAT
+  PIERDUT
+}
+
+enum TipFotografie {
+  ADULT
+  PUI
+  PARINTI
+}
+
+model Ferma {
+  id         String   @id @default(uuid())
+  nume       String
+  adresa     String?
+  dataCreare DateTime @default(now()) @map("data_creare")
+
+  utilizatori Utilizator[]
+  pasari      Pasare[]
+  perechi     Pereche[]
+
+  @@map("ferme")
+}
+
+model Utilizator {
+  id         String        @id @default(uuid())
+  fermaId    String        @map("ferma_id")
+  email      String        @unique
+  parolaHash String        @map("parola_hash")
+  rol        RolUtilizator @default(ADMIN)
+  dataCreare DateTime      @default(now()) @map("data_creare")
+
+  ferma Ferma @relation(fields: [fermaId], references: [id], onDelete: Cascade)
+
+  @@map("utilizatori")
+}
+
+model Pasare {
+  id            String        @id @default(uuid())
+  fermaId       String        @map("ferma_id")
+  nrInel        String        @map("nr_inel")
+  nume          String?
+  dataEclozare  DateTime?     @map("data_eclozare")
+  sex           SexPasare     @default(NECUNOSCUT)
+  mutatie       String?
+  culoare       String?
+  tataId        String?       @map("tata_id")
+  mamaId        String?       @map("mama_id")
+  observatii    String?
+  status        StatusPasare  @default(ACTIVA)
+  dataCreare    DateTime      @default(now()) @map("data_creare")
+
+  ferma Ferma @relation(fields: [fermaId], references: [id], onDelete: Cascade)
+
+  tata Pasare? @relation("PasareTata", fields: [tataId], references: [id], onDelete: SetNull)
+  mama Pasare? @relation("PasareMama", fields: [mamaId], references: [id], onDelete: SetNull)
+
+  copiiCaTata Pasare[] @relation("PasareTata")
+  copiiCaMama Pasare[] @relation("PasareMama")
+
+  perechiCaMascul Pereche[] @relation("PerecheMascul")
+  perechiCaFemela Pereche[] @relation("PerecheFemela")
+
+  oua         Ou[]
+  fotografii  Fotografie[]
+
+  @@unique([fermaId, nrInel])
+  @@map("pasari")
+}
+
+model Pereche {
+  id         String        @id @default(uuid())
+  fermaId    String        @map("ferma_id")
+  masculId   String        @map("mascul_id")
+  femelaId   String        @map("femela_id")
+  dataCreare DateTime      @default(now()) @map("data_creare")
+  status     StatusPereche @default(ACTIVA)
+
+  ferma  Ferma  @relation(fields: [fermaId], references: [id], onDelete: Cascade)
+  mascul Pasare @relation("PerecheMascul", fields: [masculId], references: [id], onDelete: Restrict)
+  femela Pasare @relation("PerecheFemela", fields: [femelaId], references: [id], onDelete: Restrict)
+
+  serii SerieCuibarit[]
+
+  @@map("perechi")
+}
+
+model SerieCuibarit {
+  id              String    @id @default(uuid())
+  perecheId       String    @map("pereche_id")
+  dataImperechere DateTime? @map("data_imperechere")
+  dataPrimOu      DateTime? @map("data_prim_ou")
+
+  pereche Pereche @relation(fields: [perecheId], references: [id], onDelete: Cascade)
+  oua     Ou[]
+
+  @@map("serii_cuibarit")
+}
+
+model Ou {
+  id           String   @id @default(uuid())
+  serieId      String   @map("serie_id")
+  dataDepunere DateTime @map("data_depunere")
+  status       StatusOu @default(DEPUS)
+  pasareId     String?  @map("pasare_id")
+
+  serie  SerieCuibarit @relation(fields: [serieId], references: [id], onDelete: Cascade)
+  pasare Pasare?       @relation(fields: [pasareId], references: [id], onDelete: SetNull)
+
+  @@map("oua")
+}
+
+model Fotografie {
+  id       String        @id @default(uuid())
+  pasareId String        @map("pasare_id")
+  url      String
+  tip      TipFotografie
+
+  pasare Pasare @relation(fields: [pasareId], references: [id], onDelete: Cascade)
+
+  @@map("fotografii")
+}
