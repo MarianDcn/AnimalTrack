@@ -41,6 +41,11 @@ export class PasariController {
     return this.pasariService.findOne(user.fermaId, id);
   }
 
+  @Get(':id/rude')
+  findRude(@CurrentUser() user: CurrentUserData, @Param('id') id: string) {
+    return this.pasariService.findRude(user.fermaId, id);
+  }
+
   @Patch(':id')
   update(
     @CurrentUser() user: CurrentUserData,

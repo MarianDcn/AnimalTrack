@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -17,6 +17,7 @@ import Typography from '@mui/material/Typography';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import { getPasari, stergePasare } from '../api/pasari';
 import type { Pasare } from '../types/pasare';
 import { PasareFormDialog } from '../components/PasareFormDialog';
@@ -28,7 +29,7 @@ const SEX_LABEL: Record<string, string> = {
 };
 
 export function PasariPage() {
-  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [pasari, setPasari] = useState<Pasare[] | null>(null);
   const [eroare, setEroare] = useState<string | null>(null);
   const [dialogDeschis, setDialogDeschis] = useState(false);
@@ -46,18 +47,6 @@ export function PasariPage() {
   useEffect(() => {
     incarca();
   }, []);
-
-  useEffect(() => {
-    const id = searchParams.get('id');
-    if (id && pasari) {
-      const gasita = pasari.find((p) => p.id === id);
-      if (gasita) {
-        setPasareEditata(gasita);
-        setDialogDeschis(true);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pasari]);
 
   function onAdauga() {
     setPasareEditata(null);
@@ -118,6 +107,9 @@ export function PasariPage() {
                     <Chip size="small" label={p.status} />
                   </TableCell>
                   <TableCell align="right">
+                    <IconButton size="small" onClick={() => navigate(`/pasari/${p.id}`)}>
+                      <VisibilityIcon fontSize="small" />
+                    </IconButton>
                     <IconButton size="small" onClick={() => onEditeaza(p)}>
                       <EditIcon fontSize="small" />
                     </IconButton>

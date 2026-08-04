@@ -33,8 +33,7 @@ enum StatusPasare {
 
 enum StatusPereche {
   ACTIVA
-  SEPARATA
-  ARHIVATA
+  INACTIVA
 }
 
 enum StatusOu {

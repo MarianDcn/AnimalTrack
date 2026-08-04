@@ -5,6 +5,9 @@ import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { PasariPage } from './pages/PasariPage';
+import { PasareDetailPage } from './pages/PasareDetailPage';
+import { PerechiPage } from './pages/PerechiPage';
+import { PerecheDetailPage } from './pages/PerecheDetailPage';
 
 export function App() {
   return (
@@ -28,6 +31,36 @@ export function App() {
           <RequireAuth>
             <AppLayout>
               <PasariPage />
+            </AppLayout>
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/pasari/:id"
+        element={
+          <RequireAuth>
+            <AppLayout>
+              <PasareDetailPage />
+            </AppLayout>
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/perechi"
+        element={
+          <RequireAuth>
+            <AppLayout>
+              <PerechiPage />
+            </AppLayout>
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/perechi/:id"
+        element={
+          <RequireAuth>
+            <AppLayout>
+              <PerecheDetailPage />
             </AppLayout>
           </RequireAuth>
         }

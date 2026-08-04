@@ -43,6 +43,14 @@ export function Header() {
         >
           Pasari
         </Button>
+        <Button
+          component={RouterLink}
+          to="/perechi"
+          color="inherit"
+          sx={{ opacity: location.pathname.startsWith('/perechi') ? 1 : 0.75 }}
+        >
+          Perechi
+        </Button>
 
         <Box sx={{ flexGrow: 1 }} />
 

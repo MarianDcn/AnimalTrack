@@ -54,7 +54,7 @@ export function QuickSearch() {
       noOptionsText={input ? 'Nicio pasare gasita' : 'Cauta dupa nr. inel'}
       onInputChange={(_e, valoare) => setInput(valoare)}
       onChange={(_e, valoare) => {
-        if (valoare) navigate(`/pasari?id=${valoare.id}`);
+        if (valoare) navigate(`/pasari/${valoare.id}`);
       }}
       renderOption={(props, optiune) => (
         <Box component="li" {...props} key={optiune.id} sx={{ display: 'block !important' }}>

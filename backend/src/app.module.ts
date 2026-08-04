@@ -5,6 +5,8 @@ import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { PasariModule } from './pasari/pasari.module';
+import { PerecheModule } from './perechi/pereche.module';
+import { CuibaritModule } from './cuibarit/cuibarit.module';
 
 @Module({
   imports: [
@@ -12,6 +14,8 @@ import { PasariModule } from './pasari/pasari.module';
     PrismaModule,
     AuthModule,
     PasariModule,
+    PerecheModule,
+    CuibaritModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -94,6 +94,30 @@ export class PasariService {
     }));
   }
 
+  async findRude(fermaId: string, id: string) {
+    const pasare = await this.findOne(fermaId, id);
+
+    const pui = await this.prisma.pasare.findMany({
+      where: { fermaId, OR: [{ tataId: id }, { mamaId: id }] },
+      orderBy: { dataCreare: 'desc' },
+    });
+
+    const frati =
+      pasare.tataId && pasare.mamaId
+        ? await this.prisma.pasare.findMany({
+            where: {
+              fermaId,
+              id: { not: id },
+              tataId: pasare.tataId,
+              mamaId: pasare.mamaId,
+            },
+            orderBy: { dataCreare: 'desc' },
+          })
+        : [];
+
+    return { frati, pui };
+  }
+
   private async verificaParinti(fermaId: string, tataId?: string, mamaId?: string) {
     const idParinti = [tataId, mamaId].filter((id): id is string => Boolean(id));
     if (idParinti.length === 0) return;

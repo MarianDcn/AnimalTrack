@@ -31,3 +31,13 @@ export async function cautaPasariDupaInel(nrInel: string): Promise<PasareCautare
   });
   return data;
 }
+
+export interface RudePasare {
+  frati: Pasare[];
+  pui: Pasare[];
+}
+
+export async function getRudePasare(id: string): Promise<RudePasare> {
+  const { data } = await apiClient.get<RudePasare>(`/pasari/${id}/rude`);
+  return data;
+}
