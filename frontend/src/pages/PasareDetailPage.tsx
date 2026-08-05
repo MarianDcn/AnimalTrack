@@ -17,10 +17,12 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import EditIcon from '@mui/icons-material/Edit';
+import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import { getPasare, getPasari, getRudePasare } from '../api/pasari';
 import type { RudePasare } from '../api/pasari';
 import type { Pasare } from '../types/pasare';
 import { PasareFormDialog } from '../components/PasareFormDialog';
+import { ArboreGenealogicDialog } from '../components/ArboreGenealogicDialog';
 
 const SEX_LABEL: Record<string, string> = {
   MASCUL: 'Mascul',
@@ -36,6 +38,7 @@ export function PasareDetailPage() {
   const [toatePasarile, setToatePasarile] = useState<Pasare[]>([]);
   const [eroare, setEroare] = useState<string | null>(null);
   const [dialogDeschis, setDialogDeschis] = useState(false);
+  const [arboreDeschis, setArboreDeschis] = useState(false);
 
   async function incarca() {
     if (!id) return;
@@ -81,9 +84,14 @@ export function PasareDetailPage() {
               <Chip size="small" sx={{ mt: 1 }} label={SEX_LABEL[pasare.sex]} />
               <Chip size="small" sx={{ mt: 1, ml: 1 }} label={pasare.status} variant="outlined" />
             </Box>
-            <Button startIcon={<EditIcon />} onClick={() => setDialogDeschis(true)}>
-              Editeaza
-            </Button>
+            <Stack direction="row" spacing={1}>
+              <Button startIcon={<AccountTreeIcon />} onClick={() => setArboreDeschis(true)}>
+                Vezi arbore genealogic
+              </Button>
+              <Button startIcon={<EditIcon />} onClick={() => setDialogDeschis(true)}>
+                Editeaza
+              </Button>
+            </Stack>
           </Stack>
 
           <Divider sx={{ my: 2 }} />
@@ -168,6 +176,12 @@ export function PasareDetailPage() {
         onSaved={incarca}
         pasare={pasare}
         pasariExistente={toatePasarile}
+      />
+
+      <ArboreGenealogicDialog
+        pasareId={pasare.id}
+        open={arboreDeschis}
+        onClose={() => setArboreDeschis(false)}
       />
     </>
   );

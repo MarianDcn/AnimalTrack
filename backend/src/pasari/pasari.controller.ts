@@ -12,6 +12,7 @@ import {
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { CurrentUserData } from '../auth/types/jwt-payload.type';
+import { ArboreQueryDto } from './dto/arbore-query.dto';
 import { CreatePasareDto } from './dto/create-pasare.dto';
 import { UpdatePasareDto } from './dto/update-pasare.dto';
 import { PasariService } from './pasari.service';
@@ -44,6 +45,20 @@ export class PasariController {
   @Get(':id/rude')
   findRude(@CurrentUser() user: CurrentUserData, @Param('id') id: string) {
     return this.pasariService.findRude(user.fermaId, id);
+  }
+
+  @Get(':id/arbore')
+  getArbore(
+    @CurrentUser() user: CurrentUserData,
+    @Param('id') id: string,
+    @Query() query: ArboreQueryDto,
+  ) {
+    return this.pasariService.getArbore(
+      user.fermaId,
+      id,
+      query.generatiiSus ?? 3,
+      query.generatiiJos ?? 2,
+    );
   }
 
   @Patch(':id')

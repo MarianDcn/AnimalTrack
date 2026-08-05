@@ -118,6 +118,65 @@ export class PasariService {
     return { frati, pui };
   }
 
+  async getArbore(fermaId: string, id: string, generatiiSus: number, generatiiJos: number) {
+    const pasare = await this.findOne(fermaId, id);
+
+    const stramosi = await this.prisma.$queryRaw<RandArbore[]>`
+      WITH RECURSIVE stramosi AS (
+        SELECT id, nr_inel, nume, sex, mutatie, data_eclozare, tata_id, mama_id, 0 AS nivel
+        FROM pasari
+        WHERE id = ${id} AND ferma_id = ${fermaId}
+
+        UNION ALL
+
+        SELECT p.id, p.nr_inel, p.nume, p.sex, p.mutatie, p.data_eclozare, p.tata_id, p.mama_id, s.nivel + 1
+        FROM pasari p
+        JOIN stramosi s ON p.id = s.tata_id OR p.id = s.mama_id
+        WHERE s.nivel < ${generatiiSus} AND p.ferma_id = ${fermaId}
+      )
+      SELECT * FROM stramosi WHERE nivel > 0;
+    `;
+
+    const descendenti = await this.prisma.$queryRaw<RandArbore[]>`
+      WITH RECURSIVE descendenti AS (
+        SELECT id, nr_inel, nume, sex, mutatie, data_eclozare, tata_id, mama_id, 0 AS nivel
+        FROM pasari
+        WHERE id = ${id} AND ferma_id = ${fermaId}
+
+        UNION ALL
+
+        SELECT p.id, p.nr_inel, p.nume, p.sex, p.mutatie, p.data_eclozare, p.tata_id, p.mama_id, d.nivel + 1
+        FROM pasari p
+        JOIN descendenti d ON p.tata_id = d.id OR p.mama_id = d.id
+        WHERE d.nivel < ${generatiiJos} AND p.ferma_id = ${fermaId}
+      )
+      SELECT * FROM descendenti WHERE nivel > 0;
+    `;
+
+    const mapaStramosi = new Map(stramosi.map((r) => [r.id, r]));
+    const mapaCopii = new Map<string, RandArbore[]>();
+    for (const rand of descendenti) {
+      if (rand.tata_id) mapaCopii.set(rand.tata_id, [...(mapaCopii.get(rand.tata_id) ?? []), rand]);
+      if (rand.mama_id) mapaCopii.set(rand.mama_id, [...(mapaCopii.get(rand.mama_id) ?? []), rand]);
+    }
+
+    return {
+      pasare: {
+        id: pasare.id,
+        nrInel: pasare.nrInel,
+        nume: pasare.nume,
+        sex: pasare.sex,
+        mutatie: pasare.mutatie,
+        dataEclozare: pasare.dataEclozare,
+      },
+      stramosi: {
+        tata: construiesteStramos(pasare.tataId, mapaStramosi),
+        mama: construiesteStramos(pasare.mamaId, mapaStramosi),
+      },
+      descendenti: construiesteDescendenti(pasare.id, mapaCopii, new Set([pasare.id])),
+    };
+  }
+
   private async verificaParinti(fermaId: string, tataId?: string, mamaId?: string) {
     const idParinti = [tataId, mamaId].filter((id): id is string => Boolean(id));
     if (idParinti.length === 0) return;
@@ -148,4 +207,80 @@ function calculeazaVarsta(dataEclozare: Date | null): { ani: number; luni: numbe
   }
 
   return { ani, luni };
+}
+
+export interface RandArbore {
+  id: string;
+  nr_inel: string;
+  nume: string | null;
+  sex: string;
+  mutatie: string | null;
+  data_eclozare: Date | null;
+  tata_id: string | null;
+  mama_id: string | null;
+  nivel: number;
+}
+
+export interface NodArbore {
+  id: string;
+  nrInel: string;
+  nume: string | null;
+  sex: string;
+  mutatie: string | null;
+  dataEclozare: Date | null;
+}
+
+export interface NodStramos extends NodArbore {
+  tata: NodStramos | null;
+  mama: NodStramos | null;
+}
+
+export interface NodDescendent extends NodArbore {
+  copii: NodDescendent[];
+}
+
+function randSpreNod(r: RandArbore): NodArbore {
+  return {
+    id: r.id,
+    nrInel: r.nr_inel,
+    nume: r.nume,
+    sex: r.sex,
+    mutatie: r.mutatie,
+    dataEclozare: r.data_eclozare,
+  };
+}
+
+function construiesteStramos(
+  id: string | null,
+  mapa: Map<string, RandArbore>,
+): NodStramos | null {
+  if (!id) return null;
+  const rand = mapa.get(id);
+  if (!rand) return null;
+
+  return {
+    ...randSpreNod(rand),
+    tata: construiesteStramos(rand.tata_id, mapa),
+    mama: construiesteStramos(rand.mama_id, mapa),
+  };
+}
+
+function construiesteDescendenti(
+  id: string,
+  mapaCopii: Map<string, RandArbore[]>,
+  vizitati: Set<string>,
+): NodDescendent[] {
+  const copii = mapaCopii.get(id) ?? [];
+  const rezultat: NodDescendent[] = [];
+
+  for (const copil of copii) {
+    if (vizitati.has(copil.id)) continue;
+    vizitati.add(copil.id);
+    rezultat.push({
+      ...randSpreNod(copil),
+      copii: construiesteDescendenti(copil.id, mapaCopii, vizitati),
+    });
+  }
+
+  return rezultat;
 }
