@@ -1,5 +1,6 @@
 import type { Pasare, PasareCautareRezultat, PasareFormValues } from '../types/pasare';
 import { apiClient } from './client';
+import { descarcaRaspuns } from '../utils/download';
 
 export async function getPasari(): Promise<Pasare[]> {
   const { data } = await apiClient.get<Pasare[]>('/pasari');
@@ -40,4 +41,14 @@ export interface RudePasare {
 export async function getRudePasare(id: string): Promise<RudePasare> {
   const { data } = await apiClient.get<RudePasare>(`/pasari/${id}/rude`);
   return data;
+}
+
+export async function exportPasarePdf(id: string): Promise<void> {
+  const response = await apiClient.get(`/pasari/${id}/export-pdf`, { responseType: 'blob' });
+  descarcaRaspuns(response);
+}
+
+export async function exportPasariExcel(): Promise<void> {
+  const response = await apiClient.get('/pasari/export-excel', { responseType: 'blob' });
+  descarcaRaspuns(response);
 }

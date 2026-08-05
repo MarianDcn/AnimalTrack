@@ -17,8 +17,9 @@ import Typography from '@mui/material/Typography';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import { getPasari, stergePasare } from '../api/pasari';
+import { exportPasariExcel, getPasari, stergePasare } from '../api/pasari';
 import type { Pasare } from '../types/pasare';
 import { PasareFormDialog } from '../components/PasareFormDialog';
 
@@ -34,6 +35,7 @@ export function PasariPage() {
   const [eroare, setEroare] = useState<string | null>(null);
   const [dialogDeschis, setDialogDeschis] = useState(false);
   const [pasareEditata, setPasareEditata] = useState<Pasare | null>(null);
+  const [seExporta, setSeExporta] = useState(false);
 
   async function incarca() {
     try {
@@ -64,15 +66,34 @@ export function PasariPage() {
     incarca();
   }
 
+  async function onExportExcel() {
+    setSeExporta(true);
+    try {
+      await exportPasariExcel();
+    } finally {
+      setSeExporta(false);
+    }
+  }
+
   return (
     <>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h4" sx={{ fontWeight: 600 }}>
           Pasari
         </Typography>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={onAdauga}>
-          Adauga pasare
-        </Button>
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <Button
+            variant="outlined"
+            startIcon={<FileDownloadIcon />}
+            onClick={onExportExcel}
+            disabled={seExporta}
+          >
+            Export Excel
+          </Button>
+          <Button variant="contained" startIcon={<AddIcon />} onClick={onAdauga}>
+            Adauga pasare
+          </Button>
+        </Box>
       </Box>
 
       {eroare && <Alert severity="error">{eroare}</Alert>}

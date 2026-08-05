@@ -51,6 +51,14 @@ export function Header() {
         >
           Perechi
         </Button>
+        <Button
+          component={RouterLink}
+          to="/statistici"
+          color="inherit"
+          sx={{ opacity: location.pathname.startsWith('/statistici') ? 1 : 0.75 }}
+        >
+          Statistici
+        </Button>
 
         <Box sx={{ flexGrow: 1 }} />
 

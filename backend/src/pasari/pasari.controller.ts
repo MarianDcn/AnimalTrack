@@ -7,20 +7,26 @@ import {
   Patch,
   Post,
   Query,
+  Res,
   UseGuards,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { CurrentUserData } from '../auth/types/jwt-payload.type';
 import { ArboreQueryDto } from './dto/arbore-query.dto';
 import { CreatePasareDto } from './dto/create-pasare.dto';
 import { UpdatePasareDto } from './dto/update-pasare.dto';
+import { PasariExportService } from './export.service';
 import { PasariService } from './pasari.service';
 
 @UseGuards(JwtAuthGuard)
 @Controller('pasari')
 export class PasariController {
-  constructor(private readonly pasariService: PasariService) {}
+  constructor(
+    private readonly pasariService: PasariService,
+    private readonly exportService: PasariExportService,
+  ) {}
 
   @Post()
   create(@CurrentUser() user: CurrentUserData, @Body() dto: CreatePasareDto) {
@@ -35,6 +41,17 @@ export class PasariController {
   @Get('cautare')
   cauta(@CurrentUser() user: CurrentUserData, @Query('nrInel') nrInel: string) {
     return this.pasariService.cautaDupaNrInel(user.fermaId, nrInel ?? '');
+  }
+
+  @Get('export-excel')
+  async exportExcel(@CurrentUser() user: CurrentUserData, @Res() res: Response) {
+    const buffer = await this.exportService.genereazaExcel(user.fermaId);
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    );
+    res.setHeader('Content-Disposition', 'attachment; filename="pasari.xlsx"');
+    res.send(buffer);
   }
 
   @Get(':id')
@@ -59,6 +76,19 @@ export class PasariController {
       query.generatiiSus ?? 3,
       query.generatiiJos ?? 2,
     );
+  }
+
+  @Get(':id/export-pdf')
+  async exportPdf(
+    @CurrentUser() user: CurrentUserData,
+    @Param('id') id: string,
+    @Res() res: Response,
+  ) {
+    const { doc, nrInel } = await this.exportService.genereazaPdf(user.fermaId, id);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="fisa-${nrInel}.pdf"`);
+    doc.pipe(res);
+    doc.end();
   }
 
   @Patch(':id')

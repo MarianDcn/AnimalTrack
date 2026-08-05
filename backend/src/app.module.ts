@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { PasariModule } from './pasari/pasari.module';
 import { PerecheModule } from './perechi/pereche.module';
 import { CuibaritModule } from './cuibarit/cuibarit.module';
+import { StatisticiModule } from './statistici/statistici.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { CuibaritModule } from './cuibarit/cuibarit.module';
     PasariModule,
     PerecheModule,
     CuibaritModule,
+    StatisticiModule,
   ],
   controllers: [AppController],
   providers: [AppService],

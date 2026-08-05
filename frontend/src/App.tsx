@@ -8,6 +8,7 @@ import { PasariPage } from './pages/PasariPage';
 import { PasareDetailPage } from './pages/PasareDetailPage';
 import { PerechiPage } from './pages/PerechiPage';
 import { PerecheDetailPage } from './pages/PerecheDetailPage';
+import { StatisticiPage } from './pages/StatisticiPage';
 
 export function App() {
   return (
@@ -61,6 +62,17 @@ export function App() {
           <RequireAuth>
             <AppLayout>
               <PerecheDetailPage />
+            </AppLayout>
+          </RequireAuth>
+        }
+      />
+
+      <Route
+        path="/statistici"
+        element={
+          <RequireAuth>
+            <AppLayout>
+              <StatisticiPage />
             </AppLayout>
           </RequireAuth>
         }

@@ -18,7 +18,8 @@ import Typography from '@mui/material/Typography';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import EditIcon from '@mui/icons-material/Edit';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
-import { getPasare, getPasari, getRudePasare } from '../api/pasari';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import { exportPasarePdf, getPasare, getPasari, getRudePasare } from '../api/pasari';
 import type { RudePasare } from '../api/pasari';
 import type { Pasare } from '../types/pasare';
 import { PasareFormDialog } from '../components/PasareFormDialog';
@@ -39,6 +40,7 @@ export function PasareDetailPage() {
   const [eroare, setEroare] = useState<string | null>(null);
   const [dialogDeschis, setDialogDeschis] = useState(false);
   const [arboreDeschis, setArboreDeschis] = useState(false);
+  const [seExporta, setSeExporta] = useState(false);
 
   async function incarca() {
     if (!id) return;
@@ -60,6 +62,16 @@ export function PasareDetailPage() {
     incarca();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
+
+  async function onExportPdf() {
+    if (!id) return;
+    setSeExporta(true);
+    try {
+      await exportPasarePdf(id);
+    } finally {
+      setSeExporta(false);
+    }
+  }
 
   if (eroare) return <Alert severity="error">{eroare}</Alert>;
   if (!pasare || !rude) return <Skeleton variant="rounded" height={300} />;
@@ -90,6 +102,13 @@ export function PasareDetailPage() {
               </Button>
               <Button startIcon={<EditIcon />} onClick={() => setDialogDeschis(true)}>
                 Editeaza
+              </Button>
+              <Button
+                startIcon={<FileDownloadIcon />}
+                onClick={onExportPdf}
+                disabled={seExporta}
+              >
+                Export PDF
               </Button>
             </Stack>
           </Stack>
