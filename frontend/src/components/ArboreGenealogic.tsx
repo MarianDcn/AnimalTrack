@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import type { ArboreGenealogic as ArboreGenealogicTip, NodDescendent, NodStramos } from '../types/arbore';
@@ -102,11 +103,9 @@ function NodBox({
 
 export function ArboreStramosi({
   arbore,
-  generatiiSus,
   onNodeClick,
 }: {
   arbore: ArboreGenealogicTip;
-  generatiiSus: number;
   onNodeClick: (id: string) => void;
 }) {
   const radacina: NodStramos = {
@@ -118,24 +117,35 @@ export function ArboreStramosi({
   const noduri: NodPozitionat[] = [];
   aplatizeaza(radacina, 0, 0, noduri);
 
-  const { totalInaltime } = pozitie(0, 0, generatiiSus);
-  const latimeTotala = (generatiiSus + 1) * COL_WIDTH;
+  // Layout-ul foloseste adancimea reala gasita in date, nu limita maxima ceruta
+  // (altfel un arbore cu doar 2 generatii cunoscute ar rezerva spatiu de scroll pentru 5).
+  const adancimeMaxima = noduri.reduce((max, n) => Math.max(max, n.generatie), 0);
+
+  const { y: subiectY, totalInaltime } = pozitie(0, 0, adancimeMaxima);
+  const latimeTotala = (adancimeMaxima + 1) * COL_WIDTH;
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    container.scrollTop = Math.max(0, subiectY - container.clientHeight / 2);
+  }, [subiectY, adancimeMaxima]);
 
   const linii: { x1: number; y1: number; x2: number; y2: number }[] = [];
   for (const n of noduri) {
-    const { x, y } = pozitie(n.generatie, n.slot, generatiiSus);
+    const { x, y } = pozitie(n.generatie, n.slot, adancimeMaxima);
     if (n.areTata) {
-      const copil = pozitie(n.generatie + 1, n.slot * 2, generatiiSus);
+      const copil = pozitie(n.generatie + 1, n.slot * 2, adancimeMaxima);
       linii.push({ x1: x + BOX_W, y1: y, x2: copil.x, y2: copil.y });
     }
     if (n.areMama) {
-      const copil = pozitie(n.generatie + 1, n.slot * 2 + 1, generatiiSus);
+      const copil = pozitie(n.generatie + 1, n.slot * 2 + 1, adancimeMaxima);
       linii.push({ x1: x + BOX_W, y1: y, x2: copil.x, y2: copil.y });
     }
   }
 
   return (
-    <Box sx={{ overflow: 'auto', maxHeight: '60vh' }}>
+    <Box ref={containerRef} sx={{ overflow: 'auto', maxHeight: '60vh' }}>
       <Box sx={{ position: 'relative', width: latimeTotala, height: totalInaltime }}>
         <svg
           width={latimeTotala}
@@ -156,7 +166,7 @@ export function ArboreStramosi({
           ))}
         </svg>
         {noduri.map((n) => {
-          const { x, y } = pozitie(n.generatie, n.slot, generatiiSus);
+          const { x, y } = pozitie(n.generatie, n.slot, adancimeMaxima);
           return (
             <Box key={n.id} sx={{ position: 'absolute', left: x, top: y - BOX_H / 2 }}>
               <NodBox

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -13,6 +13,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import Divider from '@mui/material/Divider';
 import Grid from '@mui/material/Grid';
+import Link from '@mui/material/Link';
 import MenuItem from '@mui/material/MenuItem';
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
@@ -25,6 +26,12 @@ import { getPereche, getSeriiPereche } from '../api/perechi';
 import type { SexPasare } from '../types/pasare';
 import type { Pereche } from '../types/pereche';
 import type { EclozeazaValues, Ou, SerieCuibarit, StatusOu } from '../types/cuibarit';
+
+const SEX_LABEL: Record<string, string> = {
+  MASCUL: 'Mascul',
+  FEMELA: 'Femela',
+  NECUNOSCUT: 'Necunoscut',
+};
 
 const STATUS_OU_LABEL: Record<StatusOu, string> = {
   DEPUS: 'Depus',
@@ -91,7 +98,13 @@ export function PerecheDetailPage() {
           <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
             <Box>
               <Typography variant="h5" sx={{ fontWeight: 600 }}>
-                {pereche.mascul.nrInel} × {pereche.femela.nrInel}
+                <Link component={RouterLink} to={`/pasari/${pereche.mascul.id}`} underline="hover">
+                  {pereche.mascul.nrInel}
+                </Link>
+                {' × '}
+                <Link component={RouterLink} to={`/pasari/${pereche.femela.id}`} underline="hover">
+                  {pereche.femela.nrInel}
+                </Link>
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 Mascul: {pereche.mascul.nrInel}
@@ -116,7 +129,7 @@ export function PerecheDetailPage() {
       </Box>
 
       <Stack spacing={2}>
-        {serii.map((serie) => (
+        {serii.map((serie, index) => (
           <Card key={serie.id} variant="outlined">
             <CardContent>
               <Stack
@@ -124,7 +137,7 @@ export function PerecheDetailPage() {
                 sx={{ justifyContent: 'space-between', alignItems: 'center', mb: 1 }}
               >
                 <Typography variant="subtitle1">
-                  Imperechere:{' '}
+                  Seria {index + 1} — Imperechere:{' '}
                   {serie.dataImperechere
                     ? new Date(serie.dataImperechere).toLocaleDateString('ro-RO')
                     : '-'}
@@ -172,8 +185,19 @@ export function PerecheDetailPage() {
                         </MenuItem>
                       ))}
                     </TextField>
-                    {ou.pasareId ? (
-                      <Chip size="small" variant="outlined" label="Legat de o pasare" />
+                    {ou.pasareId && ou.pasare ? (
+                      <Link
+                        component={RouterLink}
+                        to={`/pasari/${ou.pasare.id}`}
+                        variant="body2"
+                        underline="hover"
+                      >
+                        {ou.pasare.nrInel}
+                        {' · '}
+                        {SEX_LABEL[ou.pasare.sex]}
+                        {ou.pasare.culoare ? ` · ${ou.pasare.culoare}` : ''}
+                        {ou.pasare.mutatie ? ` · ${ou.pasare.mutatie}` : ''}
+                      </Link>
                     ) : (
                       <Button size="small" onClick={() => setOuEclozare(ou)}>
                         Marcheaza eclozat → creeaza pasare

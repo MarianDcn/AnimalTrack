@@ -3,10 +3,12 @@ import type { FormEvent } from 'react';
 import Alert from '@mui/material/Alert';
 import Autocomplete from '@mui/material/Autocomplete';
 import Button from '@mui/material/Button';
+import Checkbox from '@mui/material/Checkbox';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
+import FormControlLabel from '@mui/material/FormControlLabel';
 import Grid from '@mui/material/Grid';
 import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
@@ -32,6 +34,7 @@ const STARE_INITIALA: PasareFormValues = {
   mamaId: undefined,
   observatii: '',
   status: 'ACTIVA',
+  achizitionataDinAfara: false,
 };
 
 export function PasareFormDialog({ open, onClose, onSaved, pasare, pasariExistente }: Props) {
@@ -54,6 +57,7 @@ export function PasareFormDialog({ open, onClose, onSaved, pasare, pasariExisten
         mamaId: pasare.mamaId ?? undefined,
         observatii: pasare.observatii ?? '',
         status: pasare.status,
+        achizitionataDinAfara: pasare.achizitionataDinAfara,
       });
     } else {
       setValori(STARE_INITIALA);
@@ -123,15 +127,6 @@ export function PasareFormDialog({ open, onClose, onSaved, pasare, pasariExisten
             </Grid>
             <Grid size={6}>
               <TextField
-                label="Nume (optional)"
-                fullWidth
-                value={valori.nume}
-                onChange={(e) => actualizeaza('nume', e.target.value)}
-              />
-            </Grid>
-
-            <Grid size={6}>
-              <TextField
                 label="Data eclozarii"
                 type="date"
                 fullWidth
@@ -140,6 +135,7 @@ export function PasareFormDialog({ open, onClose, onSaved, pasare, pasariExisten
                 onChange={(e) => actualizeaza('dataEclozare', e.target.value)}
               />
             </Grid>
+
             <Grid size={6}>
               <TextField
                 select
@@ -153,21 +149,36 @@ export function PasareFormDialog({ open, onClose, onSaved, pasare, pasariExisten
                 <MenuItem value="NECUNOSCUT">Necunoscut</MenuItem>
               </TextField>
             </Grid>
-
             <Grid size={6}>
               <TextField
-                label="Mutatie"
+                select
+                label="Status"
                 fullWidth
-                value={valori.mutatie}
-                onChange={(e) => actualizeaza('mutatie', e.target.value)}
-              />
+                value={valori.status}
+                onChange={(e) => actualizeaza('status', e.target.value as PasareFormValues['status'])}
+              >
+                <MenuItem value="ACTIVA">Activa</MenuItem>
+                <MenuItem value="VANDUTA">Vanduta</MenuItem>
+                <MenuItem value="DONATA">Donata</MenuItem>
+                <MenuItem value="DECEDATA">Decedata</MenuItem>
+                <MenuItem value="TRANSFERATA">Transferata</MenuItem>
+              </TextField>
             </Grid>
+
             <Grid size={6}>
               <TextField
                 label="Culoare"
                 fullWidth
                 value={valori.culoare}
                 onChange={(e) => actualizeaza('culoare', e.target.value)}
+              />
+            </Grid>
+            <Grid size={6}>
+              <TextField
+                label="Mutatie"
+                fullWidth
+                value={valori.mutatie}
+                onChange={(e) => actualizeaza('mutatie', e.target.value)}
               />
             </Grid>
 
@@ -190,19 +201,25 @@ export function PasareFormDialog({ open, onClose, onSaved, pasare, pasariExisten
               />
             </Grid>
 
-            <Grid size={6}>
+            <Grid size={12}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={valori.achizitionataDinAfara ?? false}
+                    onChange={(e) => actualizeaza('achizitionataDinAfara', e.target.checked)}
+                  />
+                }
+                label="Achizitionata din afara crescatoriei (nu s-a nascut aici)"
+              />
+            </Grid>
+
+            <Grid size={12}>
               <TextField
-                select
-                label="Status"
+                label="Nume (optional)"
                 fullWidth
-                value={valori.status}
-                onChange={(e) => actualizeaza('status', e.target.value as PasareFormValues['status'])}
-              >
-                <MenuItem value="ACTIVA">Activa</MenuItem>
-                <MenuItem value="VANDUTA">Vanduta</MenuItem>
-                <MenuItem value="DECEDATA">Decedata</MenuItem>
-                <MenuItem value="TRANSFERATA">Transferata</MenuItem>
-              </TextField>
+                value={valori.nume}
+                onChange={(e) => actualizeaza('nume', e.target.value)}
+              />
             </Grid>
 
             <Grid size={12}>

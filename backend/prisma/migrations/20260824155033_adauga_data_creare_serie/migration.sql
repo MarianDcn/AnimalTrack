@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "serii_cuibarit" ADD COLUMN     "data_creare" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;

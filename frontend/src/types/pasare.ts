@@ -1,6 +1,6 @@
 export type SexPasare = 'MASCUL' | 'FEMELA' | 'NECUNOSCUT';
 
-export type StatusPasare = 'ACTIVA' | 'VANDUTA' | 'DECEDATA' | 'TRANSFERATA';
+export type StatusPasare = 'ACTIVA' | 'VANDUTA' | 'DONATA' | 'DECEDATA' | 'TRANSFERATA';
 
 export interface Pasare {
   id: string;
@@ -15,6 +15,7 @@ export interface Pasare {
   mamaId: string | null;
   observatii: string | null;
   status: StatusPasare;
+  achizitionataDinAfara: boolean;
   dataCreare: string;
 }
 
@@ -29,6 +30,7 @@ export interface PasareFormValues {
   mamaId?: string;
   observatii?: string;
   status?: StatusPasare;
+  achizitionataDinAfara?: boolean;
 }
 
 export interface PasareCautareRezultat {

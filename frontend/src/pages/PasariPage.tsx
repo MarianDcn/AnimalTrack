@@ -13,6 +13,7 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -27,6 +28,14 @@ const SEX_LABEL: Record<string, string> = {
   MASCUL: 'Mascul',
   FEMELA: 'Femela',
   NECUNOSCUT: 'Necunoscut',
+};
+
+const STATUS_LABEL: Record<string, string> = {
+  ACTIVA: 'Activa',
+  VANDUTA: 'Vanduta',
+  DONATA: 'Donata',
+  DECEDATA: 'Decedata',
+  TRANSFERATA: 'Transferata',
 };
 
 export function PasariPage() {
@@ -117,7 +126,16 @@ export function PasariPage() {
             <TableBody>
               {pasari.map((p) => (
                 <TableRow key={p.id} hover>
-                  <TableCell>{p.nrInel}</TableCell>
+                  <TableCell>
+                    {p.nrInel}
+                    {p.achizitionataDinAfara && (
+                      <Tooltip title="Achizitionata din afara crescatoriei (nu s-a nascut aici)">
+                        <Box component="span" sx={{ color: 'warning.main', fontWeight: 700, ml: 0.5 }}>
+                          *
+                        </Box>
+                      </Tooltip>
+                    )}
+                  </TableCell>
                   <TableCell>{p.nume ?? '-'}</TableCell>
                   <TableCell>{SEX_LABEL[p.sex]}</TableCell>
                   <TableCell>
@@ -125,7 +143,7 @@ export function PasariPage() {
                   </TableCell>
                   <TableCell>{p.mutatie ?? '-'}</TableCell>
                   <TableCell>
-                    <Chip size="small" label={p.status} />
+                    <Chip size="small" label={STATUS_LABEL[p.status] ?? p.status} />
                   </TableCell>
                   <TableCell align="right">
                     <IconButton size="small" onClick={() => navigate(`/pasari/${p.id}`)}>

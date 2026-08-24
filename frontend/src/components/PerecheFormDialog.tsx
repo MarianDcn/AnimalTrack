@@ -71,6 +71,19 @@ export function PerecheFormDialog({ open, onClose, onSaved, masculi, femele }: P
             </Alert>
           )}
 
+          {(masculi.length === 0 || femele.length === 0) && (
+            <Alert severity="warning" sx={{ mb: 2 }}>
+              {masculi.length === 0 && femele.length === 0
+                ? 'Nu ai nicio pasare cu sex Mascul sau Femela setat. '
+                : masculi.length === 0
+                  ? 'Nu ai nicio pasare cu sex Mascul setat. '
+                  : 'Nu ai nicio pasare cu sex Femela setat. '}
+              Editeaza o pasare existenta (butonul creion din pagina Pasari) si seteaza sexul,
+              sau adauga una noua — perechile se pot forma doar intre o pasare Mascul si una
+              Femela.
+            </Alert>
+          )}
+
           <Grid container spacing={2}>
             <Grid size={12}>
               <Autocomplete

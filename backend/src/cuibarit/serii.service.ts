@@ -23,7 +23,10 @@ export class SeriiService {
   async findOne(fermaId: string, id: string) {
     const serie = await this.prisma.serieCuibarit.findFirst({
       where: { id, pereche: { fermaId } },
-      include: { oua: { orderBy: { dataDepunere: 'asc' } }, pereche: true },
+      include: {
+        oua: { orderBy: { dataDepunere: 'asc' }, include: { pasare: true } },
+        pereche: true,
+      },
     });
     if (!serie) {
       throw new NotFoundException('Seria de cuibarit nu a fost gasita');

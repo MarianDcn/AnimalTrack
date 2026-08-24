@@ -16,6 +16,7 @@ export interface SerieCuibarit {
   perecheId: string;
   dataImperechere: string | null;
   dataPrimOu: string | null;
+  dataCreare: string;
   oua: Ou[];
 }
 

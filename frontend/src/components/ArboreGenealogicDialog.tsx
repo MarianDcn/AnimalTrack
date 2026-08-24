@@ -15,7 +15,7 @@ import { getArbore } from '../api/arbore';
 import type { ArboreGenealogic as ArboreGenealogicTip } from '../types/arbore';
 import { ArboreDescendenti, ArboreStramosi } from './ArboreGenealogic';
 
-const GENERATII_SUS = 3;
+const GENERATII_SUS = 5;
 const GENERATII_JOS = 2;
 
 export function ArboreGenealogicDialog({
@@ -75,7 +75,7 @@ export function ArboreGenealogicDialog({
         {!arbore && !eroare && <Skeleton variant="rounded" height={300} />}
 
         {arbore && tab === 'stramosi' && (
-          <ArboreStramosi arbore={arbore} generatiiSus={GENERATII_SUS} onNodeClick={onNodeClick} />
+          <ArboreStramosi arbore={arbore} onNodeClick={onNodeClick} />
         )}
 
         {arbore && tab === 'descendenti' && (

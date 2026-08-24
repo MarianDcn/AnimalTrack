@@ -73,7 +73,7 @@ export class PasariController {
     return this.pasariService.getArbore(
       user.fermaId,
       id,
-      query.generatiiSus ?? 3,
+      query.generatiiSus ?? 5,
       query.generatiiJos ?? 2,
     );
   }

@@ -84,8 +84,10 @@ export class PerecheService {
 
     return this.prisma.serieCuibarit.findMany({
       where: { perecheId: id },
-      include: { oua: { orderBy: { dataDepunere: 'asc' } } },
-      orderBy: { id: 'desc' },
+      include: {
+        oua: { orderBy: { dataDepunere: 'asc' }, include: { pasare: true } },
+      },
+      orderBy: { dataCreare: 'asc' },
     });
   }
 

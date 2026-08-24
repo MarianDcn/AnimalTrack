@@ -1,5 +1,13 @@
 import { Type } from 'class-transformer';
-import { IsDate, IsEnum, IsOptional, IsString, IsUUID, MinLength } from 'class-validator';
+import {
+  IsBoolean,
+  IsDate,
+  IsEnum,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MinLength,
+} from 'class-validator';
 import { SexPasare, StatusPasare } from '../../generated/prisma/enums';
 
 export class CreatePasareDto {
@@ -43,4 +51,8 @@ export class CreatePasareDto {
   @IsEnum(StatusPasare)
   @IsOptional()
   status?: StatusPasare;
+
+  @IsBoolean()
+  @IsOptional()
+  achizitionataDinAfara?: boolean;
 }

@@ -14,6 +14,7 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
+import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import EditIcon from '@mui/icons-material/Edit';
@@ -29,6 +30,14 @@ const SEX_LABEL: Record<string, string> = {
   MASCUL: 'Mascul',
   FEMELA: 'Femela',
   NECUNOSCUT: 'Necunoscut',
+};
+
+const STATUS_LABEL: Record<string, string> = {
+  ACTIVA: 'Activa',
+  VANDUTA: 'Vanduta',
+  DONATA: 'Donata',
+  DECEDATA: 'Decedata',
+  TRANSFERATA: 'Transferata',
 };
 
 export function PasareDetailPage() {
@@ -92,9 +101,21 @@ export function PasareDetailPage() {
               <Typography variant="h5" sx={{ fontWeight: 600 }}>
                 {pasare.nrInel}
                 {pasare.nume ? ` - ${pasare.nume}` : ''}
+                {pasare.achizitionataDinAfara && (
+                  <Tooltip title="Achizitionata din afara crescatoriei (nu s-a nascut aici)">
+                    <Box component="span" sx={{ color: 'warning.main', fontWeight: 700, ml: 0.5 }}>
+                      *
+                    </Box>
+                  </Tooltip>
+                )}
               </Typography>
               <Chip size="small" sx={{ mt: 1 }} label={SEX_LABEL[pasare.sex]} />
-              <Chip size="small" sx={{ mt: 1, ml: 1 }} label={pasare.status} variant="outlined" />
+              <Chip
+                size="small"
+                sx={{ mt: 1, ml: 1 }}
+                label={STATUS_LABEL[pasare.status] ?? pasare.status}
+                variant="outlined"
+              />
             </Box>
             <Stack direction="row" spacing={1}>
               <Button startIcon={<AccountTreeIcon />} onClick={() => setArboreDeschis(true)}>

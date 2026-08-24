@@ -27,6 +27,7 @@ enum SexPasare {
 enum StatusPasare {
   ACTIVA
   VANDUTA
+  DONATA
   DECEDATA
   TRANSFERATA
 }
@@ -89,6 +90,7 @@ model Pasare {
   mamaId        String?       @map("mama_id")
   observatii    String?
   status        StatusPasare  @default(ACTIVA)
+  achizitionataDinAfara Boolean @default(false) @map("achizitionata_din_afara")
   dataCreare    DateTime      @default(now()) @map("data_creare")
 
   ferma Ferma @relation(fields: [fermaId], references: [id], onDelete: Cascade)
@@ -131,6 +133,7 @@ model SerieCuibarit {
   perecheId       String    @map("pereche_id")
   dataImperechere DateTime? @map("data_imperechere")
   dataPrimOu      DateTime? @map("data_prim_ou")
+  dataCreare      DateTime  @default(now()) @map("data_creare")
 
   pereche Pereche @relation(fields: [perecheId], references: [id], onDelete: Cascade)
   oua     Ou[]

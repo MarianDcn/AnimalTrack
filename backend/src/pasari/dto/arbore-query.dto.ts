@@ -5,9 +5,9 @@ export class ArboreQueryDto {
   @Type(() => Number)
   @IsInt()
   @Min(0)
-  @Max(6)
+  @Max(8)
   @IsOptional()
-  generatiiSus?: number = 3;
+  generatiiSus?: number = 5;
 
   @Type(() => Number)
   @IsInt()

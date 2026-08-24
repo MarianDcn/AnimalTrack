@@ -40,7 +40,7 @@ export class PasariExportService {
     id: string,
   ): Promise<{ doc: PDFKit.PDFDocument; nrInel: string }> {
     const pasare = await this.pasariService.findOne(fermaId, id);
-    const arbore = await this.pasariService.getArbore(fermaId, id, 3, 2);
+    const arbore = await this.pasariService.getArbore(fermaId, id, 5, 2);
 
     const doc = new PDFDocument({ margin: 50 });
 
