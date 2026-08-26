@@ -10,9 +10,9 @@ import DialogTitle from '@mui/material/DialogTitle';
 import Grid from '@mui/material/Grid';
 import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
-import { creazaPereche } from '../api/perechi';
+import { actualizeazaPereche, creazaPereche } from '../api/perechi';
 import type { Pasare } from '../types/pasare';
-import type { PerecheFormValues } from '../types/pereche';
+import type { Pereche, PerecheFormValues } from '../types/pereche';
 
 interface Props {
   open: boolean;
@@ -20,9 +20,10 @@ interface Props {
   onSaved: () => void;
   masculi: Pasare[];
   femele: Pasare[];
+  pereche?: Pereche | null;
 }
 
-export function PerecheFormDialog({ open, onClose, onSaved, masculi, femele }: Props) {
+export function PerecheFormDialog({ open, onClose, onSaved, masculi, femele, pereche }: Props) {
   const [masculId, setMasculId] = useState<string | null>(null);
   const [femelaId, setFemelaId] = useState<string | null>(null);
   const [status, setStatus] = useState<PerecheFormValues['status']>('ACTIVA');
@@ -31,11 +32,17 @@ export function PerecheFormDialog({ open, onClose, onSaved, masculi, femele }: P
 
   useEffect(() => {
     if (!open) return;
-    setMasculId(null);
-    setFemelaId(null);
-    setStatus('ACTIVA');
     setEroare(null);
-  }, [open]);
+    if (pereche) {
+      setMasculId(pereche.masculId);
+      setFemelaId(pereche.femelaId);
+      setStatus(pereche.status);
+    } else {
+      setMasculId(null);
+      setFemelaId(null);
+      setStatus('ACTIVA');
+    }
+  }, [open, pereche]);
 
   const masculSelectat = masculi.find((p) => p.id === masculId) ?? null;
   const femelaSelectata = femele.find((p) => p.id === femelaId) ?? null;
@@ -47,7 +54,11 @@ export function PerecheFormDialog({ open, onClose, onSaved, masculi, femele }: P
     setEroare(null);
     setSeSalveaza(true);
     try {
-      await creazaPereche({ masculId, femelaId, status });
+      if (pereche) {
+        await actualizeazaPereche(pereche.id, { masculId, femelaId, status });
+      } else {
+        await creazaPereche({ masculId, femelaId, status });
+      }
       onSaved();
       onClose();
     } catch (err: unknown) {
@@ -62,7 +73,7 @@ export function PerecheFormDialog({ open, onClose, onSaved, masculi, femele }: P
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle>Pereche noua</DialogTitle>
+      <DialogTitle>{pereche ? 'Editeaza perechea' : 'Pereche noua'}</DialogTitle>
       <form onSubmit={onSubmit}>
         <DialogContent>
           {eroare && (

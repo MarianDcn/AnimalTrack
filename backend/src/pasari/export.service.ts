@@ -14,16 +14,20 @@ function formatData(d: Date): string {
   return `${d.getDate().toString().padStart(2, '0')}.${(d.getMonth() + 1).toString().padStart(2, '0')}.${d.getFullYear()}`;
 }
 
+function formatMutatii(mutatii: string[]): string {
+  return mutatii.length > 0 ? ` (${mutatii.join(', ')})` : '';
+}
+
 function scrieStramosi(doc: PDFKit.PDFDocument, nod: NodStramos | null, eticheta: string, adancime: number) {
   if (!nod) return;
-  doc.text(`${'    '.repeat(adancime)}${eticheta}: ${nod.nrInel}${nod.mutatie ? ` (${nod.mutatie})` : ''}`);
+  doc.text(`${'    '.repeat(adancime)}${eticheta}: ${nod.nrInel}${formatMutatii(nod.mutatii)}`);
   scrieStramosi(doc, nod.tata, 'Tata', adancime + 1);
   scrieStramosi(doc, nod.mama, 'Mama', adancime + 1);
 }
 
 function scrieDescendenti(doc: PDFKit.PDFDocument, noduri: NodDescendent[], adancime: number) {
   for (const n of noduri) {
-    doc.text(`${'    '.repeat(adancime)}- ${n.nrInel}${n.mutatie ? ` (${n.mutatie})` : ''}`);
+    doc.text(`${'    '.repeat(adancime)}- ${n.nrInel}${formatMutatii(n.mutatii)}`);
     scrieDescendenti(doc, n.copii, adancime + 1);
   }
 }
@@ -51,8 +55,7 @@ export class PasariExportService {
     doc.text(`Nume: ${pasare.nume ?? '-'}`);
     doc.text(`Sex: ${SEX_LABEL[pasare.sex] ?? pasare.sex}`);
     doc.text(`Data eclozarii: ${pasare.dataEclozare ? formatData(pasare.dataEclozare) : '-'}`);
-    doc.text(`Mutatie: ${pasare.mutatie ?? '-'}`);
-    doc.text(`Culoare: ${pasare.culoare ?? '-'}`);
+    doc.text(`Mutatii: ${pasare.mutatii.length > 0 ? pasare.mutatii.join(', ') : '-'}`);
     doc.text(`Status: ${pasare.status}`);
     if (pasare.observatii) {
       doc.text(`Observatii: ${pasare.observatii}`);
@@ -102,8 +105,7 @@ export class PasariExportService {
       { header: 'Nume', key: 'nume', width: 18 },
       { header: 'Sex', key: 'sex', width: 12 },
       { header: 'Data eclozarii', key: 'dataEclozare', width: 14 },
-      { header: 'Mutatie', key: 'mutatie', width: 16 },
-      { header: 'Culoare', key: 'culoare', width: 14 },
+      { header: 'Mutatii', key: 'mutatii', width: 24 },
       { header: 'Tata (nr. inel)', key: 'tata', width: 14 },
       { header: 'Mama (nr. inel)', key: 'mama', width: 14 },
       { header: 'Status', key: 'status', width: 14 },
@@ -118,8 +120,7 @@ export class PasariExportService {
         nume: p.nume ?? '',
         sex: SEX_LABEL[p.sex] ?? p.sex,
         dataEclozare: p.dataEclozare ? formatData(p.dataEclozare) : '',
-        mutatie: p.mutatie ?? '',
-        culoare: p.culoare ?? '',
+        mutatii: p.mutatii.join(', '),
         tata: p.tata?.nrInel ?? '',
         mama: p.mama?.nrInel ?? '',
         status: p.status,

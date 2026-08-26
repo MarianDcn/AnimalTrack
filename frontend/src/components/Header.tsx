@@ -59,6 +59,14 @@ export function Header() {
         >
           Statistici
         </Button>
+        <Button
+          component={RouterLink}
+          to="/setari"
+          color="inherit"
+          sx={{ opacity: location.pathname.startsWith('/setari') ? 1 : 0.75 }}
+        >
+          Setari
+        </Button>
 
         <Box sx={{ flexGrow: 1 }} />
 

@@ -17,10 +17,11 @@ import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
-import { exportPasarePdf, getPasare, getPasari, getRudePasare } from '../api/pasari';
+import { exportPasarePdf, getPasare, getPasari, getRudePasare, stergePasare } from '../api/pasari';
 import type { RudePasare } from '../api/pasari';
 import type { Pasare } from '../types/pasare';
 import { PasareFormDialog } from '../components/PasareFormDialog';
@@ -50,6 +51,7 @@ export function PasareDetailPage() {
   const [dialogDeschis, setDialogDeschis] = useState(false);
   const [arboreDeschis, setArboreDeschis] = useState(false);
   const [seExporta, setSeExporta] = useState(false);
+  const [eroareStergere, setEroareStergere] = useState<string | null>(null);
 
   async function incarca() {
     if (!id) return;
@@ -79,6 +81,21 @@ export function PasareDetailPage() {
       await exportPasarePdf(id);
     } finally {
       setSeExporta(false);
+    }
+  }
+
+  async function onSterge() {
+    if (!pasare) return;
+    if (!confirm(`Stergi pasarea ${pasare.nrInel}?`)) return;
+    setEroareStergere(null);
+    try {
+      await stergePasare(pasare.id);
+      navigate('/pasari');
+    } catch (err: unknown) {
+      const mesaj =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+        'Stergerea a esuat';
+      setEroareStergere(Array.isArray(mesaj) ? mesaj.join(', ') : mesaj);
     }
   }
 
@@ -131,8 +148,17 @@ export function PasareDetailPage() {
               >
                 Export PDF
               </Button>
+              <Button color="error" startIcon={<DeleteIcon />} onClick={onSterge}>
+                Sterge
+              </Button>
             </Stack>
           </Stack>
+
+          {eroareStergere && (
+            <Alert severity="error" sx={{ mt: 2 }}>
+              {eroareStergere}
+            </Alert>
+          )}
 
           <Divider sx={{ my: 2 }} />
 
@@ -149,10 +175,10 @@ export function PasareDetailPage() {
             </Grid>
             <Grid size={6}>
               <Typography variant="caption" color="text.secondary">
-                Mutatie / Culoare
+                Mutatii
               </Typography>
               <Typography variant="body2">
-                {pasare.mutatie ?? '-'} {pasare.culoare ? `/ ${pasare.culoare}` : ''}
+                {pasare.mutatii.length > 0 ? pasare.mutatii.join(', ') : '-'}
               </Typography>
             </Grid>
             <Grid size={6}>

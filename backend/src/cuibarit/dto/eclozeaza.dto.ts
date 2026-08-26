@@ -1,13 +1,24 @@
 import { Type } from 'class-transformer';
-import { IsDate, IsEnum, IsOptional, IsString, MinLength } from 'class-validator';
+import {
+  ArrayMaxSize,
+  IsArray,
+  IsDate,
+  IsEnum,
+  IsOptional,
+  IsString,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 import { SexPasare } from '../../generated/prisma/enums';
 
 export class EclozeazaDto {
   @IsString()
   @MinLength(1)
+  @MaxLength(50)
   nrInel: string;
 
   @IsString()
+  @MaxLength(100)
   @IsOptional()
   nume?: string;
 
@@ -20,15 +31,15 @@ export class EclozeazaDto {
   @IsOptional()
   sex?: SexPasare;
 
-  @IsString()
+  @IsArray()
+  @ArrayMaxSize(20)
+  @IsString({ each: true })
+  @MaxLength(100, { each: true })
   @IsOptional()
-  mutatie?: string;
+  mutatii?: string[];
 
   @IsString()
-  @IsOptional()
-  culoare?: string;
-
-  @IsString()
+  @MaxLength(2000)
   @IsOptional()
   observatii?: string;
 }

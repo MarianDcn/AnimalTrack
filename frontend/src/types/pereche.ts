@@ -7,7 +7,7 @@ export interface PasareRezumat {
   nrInel: string;
   nume: string | null;
   sex: SexPasare;
-  mutatie: string | null;
+  mutatii: string[];
   status: StatusPasare;
 }
 

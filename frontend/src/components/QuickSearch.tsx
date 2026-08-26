@@ -64,7 +64,7 @@ export function QuickSearch() {
           <Typography variant="caption" color="text.secondary">
             {SEX_LABEL[optiune.sex]}
             {optiune.varsta ? ` - ${optiune.varsta.ani}a ${optiune.varsta.luni}l` : ''}
-            {optiune.mutatie ? ` - ${optiune.mutatie}` : ''}
+            {optiune.mutatii.length > 0 ? ` - ${optiune.mutatii.join(', ')}` : ''}
             {optiune.tata ? ` - tata: ${optiune.tata.nrInel}` : ''}
             {optiune.mama ? ` - mama: ${optiune.mama.nrInel}` : ''}
           </Typography>

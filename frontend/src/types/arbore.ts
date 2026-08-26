@@ -5,7 +5,7 @@ export interface NodArbore {
   nrInel: string;
   nume: string | null;
   sex: SexPasare;
-  mutatie: string | null;
+  mutatii: string[];
   dataEclozare: string | null;
 }
 

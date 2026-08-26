@@ -9,7 +9,7 @@ const PASARE_SELECT = {
   nrInel: true,
   nume: true,
   sex: true,
-  mutatie: true,
+  mutatii: true,
   status: true,
 } as const;
 

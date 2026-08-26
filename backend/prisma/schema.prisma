@@ -84,8 +84,7 @@ model Pasare {
   nume          String?
   dataEclozare  DateTime?     @map("data_eclozare")
   sex           SexPasare     @default(NECUNOSCUT)
-  mutatie       String?
-  culoare       String?
+  mutatii       String[]      @default([])
   tataId        String?       @map("tata_id")
   mamaId        String?       @map("mama_id")
   observatii    String?

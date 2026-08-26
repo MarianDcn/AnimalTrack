@@ -28,8 +28,7 @@ const STARE_INITIALA: PasareFormValues = {
   nume: '',
   dataEclozare: '',
   sex: 'NECUNOSCUT',
-  mutatie: '',
-  culoare: '',
+  mutatii: [],
   tataId: undefined,
   mamaId: undefined,
   observatii: '',
@@ -51,8 +50,7 @@ export function PasareFormDialog({ open, onClose, onSaved, pasare, pasariExisten
         nume: pasare.nume ?? '',
         dataEclozare: pasare.dataEclozare ? pasare.dataEclozare.slice(0, 10) : '',
         sex: pasare.sex,
-        mutatie: pasare.mutatie ?? '',
-        culoare: pasare.culoare ?? '',
+        mutatii: pasare.mutatii,
         tataId: pasare.tataId ?? undefined,
         mamaId: pasare.mamaId ?? undefined,
         observatii: pasare.observatii ?? '',
@@ -77,8 +75,6 @@ export function PasareFormDialog({ open, onClose, onSaved, pasare, pasariExisten
       ...valori,
       nume: valori.nume || undefined,
       dataEclozare: valori.dataEclozare || undefined,
-      mutatie: valori.mutatie || undefined,
-      culoare: valori.culoare || undefined,
       observatii: valori.observatii || undefined,
     };
 
@@ -165,20 +161,20 @@ export function PasareFormDialog({ open, onClose, onSaved, pasare, pasariExisten
               </TextField>
             </Grid>
 
-            <Grid size={6}>
-              <TextField
-                label="Culoare"
-                fullWidth
-                value={valori.culoare}
-                onChange={(e) => actualizeaza('culoare', e.target.value)}
-              />
-            </Grid>
-            <Grid size={6}>
-              <TextField
-                label="Mutatie"
-                fullWidth
-                value={valori.mutatie}
-                onChange={(e) => actualizeaza('mutatie', e.target.value)}
+            <Grid size={12}>
+              <Autocomplete
+                multiple
+                freeSolo
+                options={[]}
+                value={valori.mutatii ?? []}
+                onChange={(_e, val) => actualizeaza('mutatii', val)}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Mutatii / culoare"
+                    helperText="Scrie o valoare si apasa Enter; poti adauga mai multe"
+                  />
+                )}
               />
             </Grid>
 

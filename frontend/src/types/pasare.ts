@@ -9,8 +9,7 @@ export interface Pasare {
   nume: string | null;
   dataEclozare: string | null;
   sex: SexPasare;
-  mutatie: string | null;
-  culoare: string | null;
+  mutatii: string[];
   tataId: string | null;
   mamaId: string | null;
   observatii: string | null;
@@ -24,8 +23,7 @@ export interface PasareFormValues {
   nume?: string;
   dataEclozare?: string;
   sex?: SexPasare;
-  mutatie?: string;
-  culoare?: string;
+  mutatii?: string[];
   tataId?: string;
   mamaId?: string;
   observatii?: string;
@@ -40,7 +38,7 @@ export interface PasareCautareRezultat {
   dataEclozare: string | null;
   varsta: { ani: number; luni: number } | null;
   sex: SexPasare;
-  mutatie: string | null;
+  mutatii: string[];
   tata: { id: string; nrInel: string } | null;
   mama: { id: string; nrInel: string } | null;
 }

@@ -118,7 +118,7 @@ export function PasariPage() {
                 <TableCell>Nume</TableCell>
                 <TableCell>Sex</TableCell>
                 <TableCell>Data eclozarii</TableCell>
-                <TableCell>Mutatie</TableCell>
+                <TableCell>Mutatii</TableCell>
                 <TableCell>Status</TableCell>
                 <TableCell align="right">Actiuni</TableCell>
               </TableRow>
@@ -141,7 +141,7 @@ export function PasariPage() {
                   <TableCell>
                     {p.dataEclozare ? new Date(p.dataEclozare).toLocaleDateString('ro-RO') : '-'}
                   </TableCell>
-                  <TableCell>{p.mutatie ?? '-'}</TableCell>
+                  <TableCell>{p.mutatii.length > 0 ? p.mutatii.join(', ') : '-'}</TableCell>
                   <TableCell>
                     <Chip size="small" label={STATUS_LABEL[p.status] ?? p.status} />
                   </TableCell>

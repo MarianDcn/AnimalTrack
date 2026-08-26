@@ -1,11 +1,14 @@
 import { Type } from 'class-transformer';
 import {
+  ArrayMaxSize,
+  IsArray,
   IsBoolean,
   IsDate,
   IsEnum,
   IsOptional,
   IsString,
   IsUUID,
+  MaxLength,
   MinLength,
 } from 'class-validator';
 import { SexPasare, StatusPasare } from '../../generated/prisma/enums';
@@ -13,9 +16,11 @@ import { SexPasare, StatusPasare } from '../../generated/prisma/enums';
 export class CreatePasareDto {
   @IsString()
   @MinLength(1)
+  @MaxLength(50)
   nrInel: string;
 
   @IsString()
+  @MaxLength(100)
   @IsOptional()
   nume?: string;
 
@@ -28,13 +33,12 @@ export class CreatePasareDto {
   @IsOptional()
   sex?: SexPasare;
 
-  @IsString()
+  @IsArray()
+  @ArrayMaxSize(20)
+  @IsString({ each: true })
+  @MaxLength(100, { each: true })
   @IsOptional()
-  mutatie?: string;
-
-  @IsString()
-  @IsOptional()
-  culoare?: string;
+  mutatii?: string[];
 
   @IsUUID()
   @IsOptional()
@@ -45,6 +49,7 @@ export class CreatePasareDto {
   mamaId?: string;
 
   @IsString()
+  @MaxLength(2000)
   @IsOptional()
   observatii?: string;
 

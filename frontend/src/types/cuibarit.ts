@@ -34,7 +34,6 @@ export interface EclozeazaValues {
   nume?: string;
   dataEclozare?: string;
   sex?: SexPasare;
-  mutatie?: string;
-  culoare?: string;
+  mutatii?: string[];
   observatii?: string;
 }

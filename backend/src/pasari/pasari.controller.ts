@@ -15,6 +15,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { CurrentUserData } from '../auth/types/jwt-payload.type';
 import { ArboreQueryDto } from './dto/arbore-query.dto';
+import { CautaQueryDto } from './dto/cauta-query.dto';
 import { CreatePasareDto } from './dto/create-pasare.dto';
 import { UpdatePasareDto } from './dto/update-pasare.dto';
 import { PasariExportService } from './export.service';
@@ -39,8 +40,8 @@ export class PasariController {
   }
 
   @Get('cautare')
-  cauta(@CurrentUser() user: CurrentUserData, @Query('nrInel') nrInel: string) {
-    return this.pasariService.cautaDupaNrInel(user.fermaId, nrInel ?? '');
+  cauta(@CurrentUser() user: CurrentUserData, @Query() query: CautaQueryDto) {
+    return this.pasariService.cautaDupaNrInel(user.fermaId, query.nrInel ?? '');
   }
 
   @Get('export-excel')

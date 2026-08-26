@@ -5,8 +5,10 @@ import type { ArboreGenealogic as ArboreGenealogicTip, NodDescendent, NodStramos
 
 const COL_WIDTH = 190;
 const BOX_W = 156;
-const BOX_H = 46;
-const LEAF_ROW_H = 58;
+const BOX_H_BAZA = 30;
+const LINIE_MUTATIE_H = 14;
+const MAX_LINII_MUTATII = 3;
+const LEAF_ROW_H = 92;
 
 const SEX_CULOARE: Record<string, string> = {
   MASCUL: '#1565c0',
@@ -14,12 +16,16 @@ const SEX_CULOARE: Record<string, string> = {
   NECUNOSCUT: '#616161',
 };
 
+function inaltimeCasuta(nrMutatii: number): number {
+  return BOX_H_BAZA + Math.min(nrMutatii, MAX_LINII_MUTATII) * LINIE_MUTATIE_H;
+}
+
 interface NodPozitionat {
   id: string;
   nrInel: string;
   nume: string | null;
   sex: string;
-  mutatie: string | null;
+  mutatii: string[];
   generatie: number;
   slot: number;
   areTata: boolean;
@@ -38,7 +44,7 @@ function aplatizeaza(
     nrInel: nod.nrInel,
     nume: nod.nume,
     sex: nod.sex,
-    mutatie: nod.mutatie,
+    mutatii: nod.mutatii,
     generatie,
     slot,
     areTata: !!nod.tata,
@@ -60,21 +66,24 @@ function NodBox({
   nrInel,
   nume,
   sex,
-  mutatie,
+  mutatii,
   onClick,
 }: {
   nrInel: string;
   nume: string | null;
   sex: string;
-  mutatie: string | null;
+  mutatii: string[];
   onClick: () => void;
 }) {
+  const liniiAfisate = mutatii.slice(0, MAX_LINII_MUTATII);
+  const restul = mutatii.length - liniiAfisate.length;
+
   return (
     <Box
       onClick={onClick}
       sx={{
         width: BOX_W,
-        height: BOX_H,
+        height: inaltimeCasuta(mutatii.length),
         borderRadius: 1,
         border: '2px solid',
         borderColor: SEX_CULOARE[sex] ?? SEX_CULOARE.NECUNOSCUT,
@@ -83,6 +92,7 @@ function NodBox({
         flexDirection: 'column',
         justifyContent: 'center',
         px: 1,
+        py: 0.5,
         cursor: 'pointer',
         overflow: 'hidden',
         '&:hover': { bgcolor: 'action.hover' },
@@ -92,9 +102,20 @@ function NodBox({
         {nrInel}
         {nume ? ` - ${nume}` : ''}
       </Typography>
-      {mutatie && (
-        <Typography variant="caption" color="text.secondary" noWrap sx={{ lineHeight: 1.1 }}>
-          {mutatie}
+      {liniiAfisate.map((m, i) => (
+        <Typography
+          key={i}
+          variant="caption"
+          color="text.secondary"
+          noWrap
+          sx={{ lineHeight: 1.15 }}
+        >
+          {m}
+        </Typography>
+      ))}
+      {restul > 0 && (
+        <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.15 }}>
+          +{restul} alte mutatii
         </Typography>
       )}
     </Box>
@@ -168,12 +189,15 @@ export function ArboreStramosi({
         {noduri.map((n) => {
           const { x, y } = pozitie(n.generatie, n.slot, adancimeMaxima);
           return (
-            <Box key={n.id} sx={{ position: 'absolute', left: x, top: y - BOX_H / 2 }}>
+            <Box
+              key={n.id}
+              sx={{ position: 'absolute', left: x, top: y - inaltimeCasuta(n.mutatii.length) / 2 }}
+            >
               <NodBox
                 nrInel={n.nrInel}
                 nume={n.nume}
                 sex={n.sex}
-                mutatie={n.mutatie}
+                mutatii={n.mutatii}
                 onClick={() => onNodeClick(n.id)}
               />
             </Box>
@@ -222,7 +246,7 @@ function RamuraDescendent({
           nrInel={nod.nrInel}
           nume={nod.nume}
           sex={nod.sex}
-          mutatie={nod.mutatie}
+          mutatii={nod.mutatii}
           onClick={() => onNodeClick(nod.id)}
         />
       </Box>

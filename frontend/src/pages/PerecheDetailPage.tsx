@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom';
 import Alert from '@mui/material/Alert';
+import Autocomplete from '@mui/material/Autocomplete';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
@@ -20,10 +21,14 @@ import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import EggIcon from '@mui/icons-material/Egg';
 import { adaugaOu, actualizeazaStatusOu, creazaSerie, eclozeazaOu } from '../api/cuibarit';
-import { getPereche, getSeriiPereche } from '../api/perechi';
-import type { SexPasare } from '../types/pasare';
+import { getPasari } from '../api/pasari';
+import { getPereche, getSeriiPereche, stergePereche } from '../api/perechi';
+import { PerecheFormDialog } from '../components/PerecheFormDialog';
+import type { Pasare, SexPasare } from '../types/pasare';
 import type { Pereche } from '../types/pereche';
 import type { EclozeazaValues, Ou, SerieCuibarit, StatusOu } from '../types/cuibarit';
 
@@ -57,13 +62,20 @@ export function PerecheDetailPage() {
   const [eroare, setEroare] = useState<string | null>(null);
   const [dialogSerieDeschis, setDialogSerieDeschis] = useState(false);
   const [ouEclozare, setOuEclozare] = useState<Ou | null>(null);
+  const [dialogEditareDeschis, setDialogEditareDeschis] = useState(false);
+  const [toatePasarile, setToatePasarile] = useState<Pasare[]>([]);
 
   async function incarca() {
     if (!id) return;
     try {
-      const [perecheData, seriiData] = await Promise.all([getPereche(id), getSeriiPereche(id)]);
+      const [perecheData, seriiData, toate] = await Promise.all([
+        getPereche(id),
+        getSeriiPereche(id),
+        getPasari(),
+      ]);
       setPereche(perecheData);
       setSerii(seriiData);
+      setToatePasarile(toate);
     } catch {
       setEroare('Nu am putut incarca perechea');
     }
@@ -82,6 +94,16 @@ export function PerecheDetailPage() {
   async function onSchimbaStatus(ouId: string, status: StatusOu) {
     await actualizeazaStatusOu(ouId, status);
     incarca();
+  }
+
+  async function onStergePereche() {
+    if (!pereche) return;
+    const confirmat = confirm(
+      `Stergi perechea ${pereche.mascul.nrInel} × ${pereche.femela.nrInel}? Se sterg si toate seriile de cuibarit si ouale asociate.`,
+    );
+    if (!confirmat) return;
+    await stergePereche(pereche.id);
+    navigate('/perechi');
   }
 
   if (eroare) return <Alert severity="error">{eroare}</Alert>;
@@ -113,10 +135,22 @@ export function PerecheDetailPage() {
                 {pereche.femela.nume ? ` (${pereche.femela.nume})` : ''}
               </Typography>
             </Box>
-            <Chip
-              label={pereche.status === 'ACTIVA' ? 'Activa' : 'Inactiva'}
-              color={pereche.status === 'ACTIVA' ? 'success' : 'default'}
-            />
+            <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+              <Chip
+                label={pereche.status === 'ACTIVA' ? 'Activa' : 'Inactiva'}
+                color={pereche.status === 'ACTIVA' ? 'success' : 'default'}
+              />
+              <Button
+                size="small"
+                startIcon={<EditIcon />}
+                onClick={() => setDialogEditareDeschis(true)}
+              >
+                Editeaza
+              </Button>
+              <Button size="small" color="error" startIcon={<DeleteIcon />} onClick={onStergePereche}>
+                Sterge
+              </Button>
+            </Stack>
           </Stack>
         </CardContent>
       </Card>
@@ -195,8 +229,7 @@ export function PerecheDetailPage() {
                         {ou.pasare.nrInel}
                         {' · '}
                         {SEX_LABEL[ou.pasare.sex]}
-                        {ou.pasare.culoare ? ` · ${ou.pasare.culoare}` : ''}
-                        {ou.pasare.mutatie ? ` · ${ou.pasare.mutatie}` : ''}
+                        {ou.pasare.mutatii.length > 0 ? ` · ${ou.pasare.mutatii.join(', ')}` : ''}
                       </Link>
                     ) : (
                       <Button size="small" onClick={() => setOuEclozare(ou)}>
@@ -225,6 +258,15 @@ export function PerecheDetailPage() {
       />
 
       <EclozeazaDialog ou={ouEclozare} onClose={() => setOuEclozare(null)} onSaved={incarca} />
+
+      <PerecheFormDialog
+        open={dialogEditareDeschis}
+        onClose={() => setDialogEditareDeschis(false)}
+        onSaved={incarca}
+        pereche={pereche}
+        masculi={toatePasarile.filter((p) => p.sex === 'MASCUL')}
+        femele={toatePasarile.filter((p) => p.sex === 'FEMELA')}
+      />
     </>
   );
 }
@@ -328,8 +370,6 @@ function EclozeazaDialog({
         ...valori,
         nume: valori.nume || undefined,
         dataEclozare: valori.dataEclozare || undefined,
-        mutatie: valori.mutatie || undefined,
-        culoare: valori.culoare || undefined,
         observatii: valori.observatii || undefined,
       });
       onSaved();
@@ -398,20 +438,20 @@ function EclozeazaDialog({
                 <MenuItem value="NECUNOSCUT">Necunoscut</MenuItem>
               </TextField>
             </Grid>
-            <Grid size={6}>
-              <TextField
-                label="Mutatie"
-                fullWidth
-                value={valori.mutatie ?? ''}
-                onChange={(e) => actualizeaza('mutatie', e.target.value)}
-              />
-            </Grid>
-            <Grid size={6}>
-              <TextField
-                label="Culoare"
-                fullWidth
-                value={valori.culoare ?? ''}
-                onChange={(e) => actualizeaza('culoare', e.target.value)}
+            <Grid size={12}>
+              <Autocomplete
+                multiple
+                freeSolo
+                options={[]}
+                value={valori.mutatii ?? []}
+                onChange={(_e, val) => actualizeaza('mutatii', val)}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Mutatii / culoare"
+                    helperText="Scrie o valoare si apasa Enter; poti adauga mai multe"
+                  />
+                )}
               />
             </Grid>
             <Grid size={12}>

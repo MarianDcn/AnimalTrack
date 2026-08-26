@@ -9,6 +9,7 @@ import { PasareDetailPage } from './pages/PasareDetailPage';
 import { PerechiPage } from './pages/PerechiPage';
 import { PerecheDetailPage } from './pages/PerecheDetailPage';
 import { StatisticiPage } from './pages/StatisticiPage';
+import { SetariPage } from './pages/SetariPage';
 
 export function App() {
   return (
@@ -73,6 +74,17 @@ export function App() {
           <RequireAuth>
             <AppLayout>
               <StatisticiPage />
+            </AppLayout>
+          </RequireAuth>
+        }
+      />
+
+      <Route
+        path="/setari"
+        element={
+          <RequireAuth>
+            <AppLayout>
+              <SetariPage />
             </AppLayout>
           </RequireAuth>
         }

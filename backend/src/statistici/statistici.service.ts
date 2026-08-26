@@ -6,20 +6,27 @@ interface RandPuiPeAn {
   total: bigint;
 }
 
+interface RandPasariPeMutatie {
+  mutatie: string;
+  total: bigint;
+}
+
 @Injectable()
 export class StatisticiService {
   constructor(private readonly prisma: PrismaService) {}
 
   async pasariPeMutatie(fermaId: string) {
-    const rezultat = await this.prisma.pasare.groupBy({
-      by: ['mutatie'],
-      where: { fermaId },
-      _count: { _all: true },
-    });
+    const rezultat = await this.prisma.$queryRaw<RandPasariPeMutatie[]>`
+      SELECT COALESCE(mutatie, 'Fara mutatie specificata') AS mutatie, COUNT(*) AS total
+      FROM pasari, UNNEST(
+        CASE WHEN array_length(mutatii, 1) IS NULL THEN ARRAY[NULL]::text[] ELSE mutatii END
+      ) AS mutatie
+      WHERE ferma_id = ${fermaId}
+      GROUP BY mutatie
+      ORDER BY total DESC;
+    `;
 
-    return rezultat
-      .map((r) => ({ mutatie: r.mutatie ?? 'Necunoscuta', total: r._count._all }))
-      .sort((a, b) => b.total - a.total);
+    return rezultat.map((r) => ({ mutatie: r.mutatie, total: Number(r.total) }));
   }
 
   async puiPeAn(fermaId: string) {
@@ -88,7 +95,7 @@ export class StatisticiService {
 
     const idParinti = grupat.map((g) => g[camp]).filter((id): id is string => Boolean(id));
     const parinti = await this.prisma.pasare.findMany({
-      where: { id: { in: idParinti } },
+      where: { id: { in: idParinti }, fermaId },
       select: { id: true, nrInel: true },
     });
     const mapaParinti = new Map(parinti.map((p) => [p.id, p.nrInel]));

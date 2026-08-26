@@ -66,7 +66,19 @@ export class PasariService {
 
   async remove(fermaId: string, id: string) {
     await this.findOne(fermaId, id);
-    await this.prisma.pasare.delete({ where: { id } });
+    try {
+      await this.prisma.pasare.delete({ where: { id } });
+    } catch (err) {
+      if (
+        err instanceof Prisma.PrismaClientKnownRequestError &&
+        (err.code === 'P2003' || err.code === 'P2039')
+      ) {
+        throw new ConflictException(
+          'Nu poti sterge aceasta pasare cat timp face parte dintr-o pereche. Sterge mai intai perechea.',
+        );
+      }
+      throw err;
+    }
     return { success: true };
   }
 
@@ -88,7 +100,7 @@ export class PasariService {
       dataEclozare: p.dataEclozare,
       varsta: calculeazaVarsta(p.dataEclozare),
       sex: p.sex,
-      mutatie: p.mutatie,
+      mutatii: p.mutatii,
       tata: p.tata ? { id: p.tata.id, nrInel: p.tata.nrInel } : null,
       mama: p.mama ? { id: p.mama.id, nrInel: p.mama.nrInel } : null,
     }));
@@ -123,13 +135,13 @@ export class PasariService {
 
     const stramosi = await this.prisma.$queryRaw<RandArbore[]>`
       WITH RECURSIVE stramosi AS (
-        SELECT id, nr_inel, nume, sex, mutatie, data_eclozare, tata_id, mama_id, 0 AS nivel
+        SELECT id, nr_inel, nume, sex, mutatii, data_eclozare, tata_id, mama_id, 0 AS nivel
         FROM pasari
         WHERE id = ${id} AND ferma_id = ${fermaId}
 
         UNION ALL
 
-        SELECT p.id, p.nr_inel, p.nume, p.sex, p.mutatie, p.data_eclozare, p.tata_id, p.mama_id, s.nivel + 1
+        SELECT p.id, p.nr_inel, p.nume, p.sex, p.mutatii, p.data_eclozare, p.tata_id, p.mama_id, s.nivel + 1
         FROM pasari p
         JOIN stramosi s ON p.id = s.tata_id OR p.id = s.mama_id
         WHERE s.nivel < ${generatiiSus} AND p.ferma_id = ${fermaId}
@@ -139,13 +151,13 @@ export class PasariService {
 
     const descendenti = await this.prisma.$queryRaw<RandArbore[]>`
       WITH RECURSIVE descendenti AS (
-        SELECT id, nr_inel, nume, sex, mutatie, data_eclozare, tata_id, mama_id, 0 AS nivel
+        SELECT id, nr_inel, nume, sex, mutatii, data_eclozare, tata_id, mama_id, 0 AS nivel
         FROM pasari
         WHERE id = ${id} AND ferma_id = ${fermaId}
 
         UNION ALL
 
-        SELECT p.id, p.nr_inel, p.nume, p.sex, p.mutatie, p.data_eclozare, p.tata_id, p.mama_id, d.nivel + 1
+        SELECT p.id, p.nr_inel, p.nume, p.sex, p.mutatii, p.data_eclozare, p.tata_id, p.mama_id, d.nivel + 1
         FROM pasari p
         JOIN descendenti d ON p.tata_id = d.id OR p.mama_id = d.id
         WHERE d.nivel < ${generatiiJos} AND p.ferma_id = ${fermaId}
@@ -166,7 +178,7 @@ export class PasariService {
         nrInel: pasare.nrInel,
         nume: pasare.nume,
         sex: pasare.sex,
-        mutatie: pasare.mutatie,
+        mutatii: pasare.mutatii,
         dataEclozare: pasare.dataEclozare,
       },
       stramosi: {
@@ -214,7 +226,7 @@ export interface RandArbore {
   nr_inel: string;
   nume: string | null;
   sex: string;
-  mutatie: string | null;
+  mutatii: string[];
   data_eclozare: Date | null;
   tata_id: string | null;
   mama_id: string | null;
@@ -226,7 +238,7 @@ export interface NodArbore {
   nrInel: string;
   nume: string | null;
   sex: string;
-  mutatie: string | null;
+  mutatii: string[];
   dataEclozare: Date | null;
 }
 
@@ -245,7 +257,7 @@ function randSpreNod(r: RandArbore): NodArbore {
     nrInel: r.nr_inel,
     nume: r.nume,
     sex: r.sex,
-    mutatie: r.mutatie,
+    mutatii: r.mutatii,
     dataEclozare: r.data_eclozare,
   };
 }
