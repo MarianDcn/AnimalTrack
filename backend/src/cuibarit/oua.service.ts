@@ -69,6 +69,7 @@ export class OuaService {
             nrInel: dto.nrInel,
             rnc: dto.rnc,
             dataEclozare: dto.dataEclozare,
+            anEclozare: dto.dataEclozare ? dto.dataEclozare.getFullYear() : null,
             sex: dto.sex,
             mutatii: dto.mutatii ?? [],
             observatii: dto.observatii,

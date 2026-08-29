@@ -211,7 +211,7 @@ export function PasareFormDialog({ open, onClose, onSaved, pasare, pasariExisten
 
             <Grid size={12}>
               <TextField
-                label="RNC"
+                label="Rnc"
                 helperText="Identificator unic de crescator (optional)"
                 fullWidth
                 value={valori.rnc}

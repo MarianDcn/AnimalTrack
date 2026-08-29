@@ -88,6 +88,7 @@ export class BackupService {
               nrInel: p.nrInel,
               rnc: p.rnc,
               dataEclozare: p.dataEclozare ? new Date(p.dataEclozare) : null,
+              anEclozare: p.dataEclozare ? new Date(p.dataEclozare).getFullYear() : null,
               sex: p.sex as never,
               mutatii: p.mutatii ?? [],
               observatii: p.observatii,

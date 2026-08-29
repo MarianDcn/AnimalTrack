@@ -473,7 +473,7 @@ function EclozeazaDialog({
             </Grid>
             <Grid size={6}>
               <TextField
-                label="RNC"
+                label="Rnc"
                 fullWidth
                 value={valori.rnc ?? ''}
                 onChange={(e) => actualizeaza('rnc', e.target.value)}

@@ -18,11 +18,13 @@ export class PasariService {
 
     try {
       return await this.prisma.pasare.create({
-        data: { ...dto, fermaId },
+        data: { ...dto, fermaId, anEclozare: anDinData(dto.dataEclozare) },
       });
     } catch (err) {
       if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
-        throw new ConflictException('Exista deja o pasare cu acest nr. de inel in ferma ta');
+        throw new ConflictException(
+          'Exista deja o pasare cu acest nr. de inel, acelasi Rnc si acelasi an de eclozare in ferma ta',
+        );
       }
       throw err;
     }
@@ -51,14 +53,21 @@ export class PasariService {
     }
     await this.verificaParinti(fermaId, dto.tataId, dto.mamaId);
 
+    const data: Prisma.PasareUpdateInput = { ...dto };
+    if (dto.dataEclozare !== undefined) {
+      data.anEclozare = anDinData(dto.dataEclozare);
+    }
+
     try {
       return await this.prisma.pasare.update({
         where: { id },
-        data: dto,
+        data,
       });
     } catch (err) {
       if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
-        throw new ConflictException('Exista deja o pasare cu acest nr. de inel in ferma ta');
+        throw new ConflictException(
+          'Exista deja o pasare cu acest nr. de inel, acelasi Rnc si acelasi an de eclozare in ferma ta',
+        );
       }
       throw err;
     }
@@ -201,6 +210,10 @@ export class PasariService {
       throw new BadRequestException('Parintele indicat nu exista in ferma ta');
     }
   }
+}
+
+function anDinData(dataEclozare?: Date | null): number | null {
+  return dataEclozare ? dataEclozare.getFullYear() : null;
 }
 
 function calculeazaVarsta(dataEclozare: Date | null): { ani: number; luni: number } | null {

@@ -83,6 +83,7 @@ model Pasare {
   nrInel        String        @map("nr_inel")
   rnc           String?
   dataEclozare  DateTime?     @map("data_eclozare")
+  anEclozare    Int?          @map("an_eclozare")
   sex           SexPasare     @default(NECUNOSCUT)
   mutatii       String[]      @default([])
   tataId        String?       @map("tata_id")
@@ -106,7 +107,7 @@ model Pasare {
   oua         Ou[]
   fotografii  Fotografie[]
 
-  @@unique([fermaId, nrInel])
+  @@unique([fermaId, nrInel, rnc, anEclozare])
   @@map("pasari")
 }
 

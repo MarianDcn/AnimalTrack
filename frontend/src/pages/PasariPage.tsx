@@ -115,7 +115,7 @@ export function PasariPage() {
             <TableHead>
               <TableRow>
                 <TableCell>Nr. inel</TableCell>
-                <TableCell>RNC</TableCell>
+                <TableCell>Rnc</TableCell>
                 <TableCell>Sex</TableCell>
                 <TableCell>Data eclozarii</TableCell>
                 <TableCell>Mutatii</TableCell>
