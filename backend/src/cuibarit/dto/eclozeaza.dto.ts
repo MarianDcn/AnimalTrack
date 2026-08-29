@@ -20,7 +20,7 @@ export class EclozeazaDto {
   @IsString()
   @MaxLength(100)
   @IsOptional()
-  nume?: string;
+  rnc?: string;
 
   @IsDate()
   @Type(() => Date)

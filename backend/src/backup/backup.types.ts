@@ -1,7 +1,7 @@
 export interface BackupPasare {
   id: string;
   nrInel: string;
-  nume: string | null;
+  rnc: string | null;
   dataEclozare: string | Date | null;
   sex: string;
   mutatii: string[];

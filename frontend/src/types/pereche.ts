@@ -5,7 +5,7 @@ export type StatusPereche = 'ACTIVA' | 'INACTIVA';
 export interface PasareRezumat {
   id: string;
   nrInel: string;
-  nume: string | null;
+  rnc: string | null;
   sex: SexPasare;
   mutatii: string[];
   status: StatusPasare;

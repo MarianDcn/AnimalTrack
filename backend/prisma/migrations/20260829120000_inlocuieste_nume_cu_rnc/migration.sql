@@ -1,0 +1,2 @@
+ALTER TABLE "pasari" DROP COLUMN "nume";
+ALTER TABLE "pasari" ADD COLUMN "rnc" TEXT;

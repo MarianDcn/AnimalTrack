@@ -81,7 +81,7 @@ model Pasare {
   id            String        @id @default(uuid())
   fermaId       String        @map("ferma_id")
   nrInel        String        @map("nr_inel")
-  nume          String?
+  rnc           String?
   dataEclozare  DateTime?     @map("data_eclozare")
   sex           SexPasare     @default(NECUNOSCUT)
   mutatii       String[]      @default([])

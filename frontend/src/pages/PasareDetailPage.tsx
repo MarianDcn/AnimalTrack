@@ -117,7 +117,7 @@ export function PasareDetailPage() {
             <Box>
               <Typography variant="h5" sx={{ fontWeight: 600 }}>
                 {pasare.nrInel}
-                {pasare.nume ? ` - ${pasare.nume}` : ''}
+                {pasare.rnc ? ` - ${pasare.rnc}` : ''}
                 {pasare.achizitionataDinAfara && (
                   <Tooltip title="Achizitionata din afara crescatoriei (nu s-a nascut aici)">
                     <Box component="span" sx={{ color: 'warning.main', fontWeight: 700, ml: 0.5 }}>
@@ -272,7 +272,7 @@ function ListaRude({ pasari, gol }: { pasari: Pasare[]; gol: string }) {
           sx={{ borderRadius: 1 }}
         >
           <ListItemText
-            primary={`${p.nrInel}${p.nume ? ` - ${p.nume}` : ''}`}
+            primary={`${p.nrInel}${p.rnc ? ` - ${p.rnc}` : ''}`}
             secondary={SEX_LABEL[p.sex]}
           />
         </ListItemButton>

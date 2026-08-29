@@ -115,7 +115,7 @@ export function PasariPage() {
             <TableHead>
               <TableRow>
                 <TableCell>Nr. inel</TableCell>
-                <TableCell>Nume</TableCell>
+                <TableCell>RNC</TableCell>
                 <TableCell>Sex</TableCell>
                 <TableCell>Data eclozarii</TableCell>
                 <TableCell>Mutatii</TableCell>
@@ -136,7 +136,7 @@ export function PasariPage() {
                       </Tooltip>
                     )}
                   </TableCell>
-                  <TableCell>{p.nume ?? '-'}</TableCell>
+                  <TableCell>{p.rnc ?? '-'}</TableCell>
                   <TableCell>{SEX_LABEL[p.sex]}</TableCell>
                   <TableCell>
                     {p.dataEclozare ? new Date(p.dataEclozare).toLocaleDateString('ro-RO') : '-'}

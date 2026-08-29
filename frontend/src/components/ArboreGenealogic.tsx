@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+﻿import { useEffect, useRef } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import type { ArboreGenealogic as ArboreGenealogicTip, NodDescendent, NodStramos } from '../types/arbore';
@@ -23,7 +23,7 @@ function inaltimeCasuta(nrMutatii: number): number {
 interface NodPozitionat {
   id: string;
   nrInel: string;
-  nume: string | null;
+  rnc: string | null;
   sex: string;
   mutatii: string[];
   generatie: number;
@@ -42,7 +42,7 @@ function aplatizeaza(
   acumulator.push({
     id: nod.id,
     nrInel: nod.nrInel,
-    nume: nod.nume,
+    rnc: nod.rnc,
     sex: nod.sex,
     mutatii: nod.mutatii,
     generatie,
@@ -64,13 +64,13 @@ function pozitie(generatie: number, slot: number, generatiiTotale: number) {
 
 function NodBox({
   nrInel,
-  nume,
+  rnc,
   sex,
   mutatii,
   onClick,
 }: {
   nrInel: string;
-  nume: string | null;
+  rnc: string | null;
   sex: string;
   mutatii: string[];
   onClick: () => void;
@@ -100,7 +100,7 @@ function NodBox({
     >
       <Typography variant="body2" noWrap sx={{ fontWeight: 600, lineHeight: 1.2 }}>
         {nrInel}
-        {nume ? ` - ${nume}` : ''}
+        {rnc ? ` - ${rnc}` : ''}
       </Typography>
       {liniiAfisate.map((m, i) => (
         <Typography
@@ -195,7 +195,7 @@ export function ArboreStramosi({
             >
               <NodBox
                 nrInel={n.nrInel}
-                nume={n.nume}
+                rnc={n.rnc}
                 sex={n.sex}
                 mutatii={n.mutatii}
                 onClick={() => onNodeClick(n.id)}
@@ -244,7 +244,7 @@ function RamuraDescendent({
       <Box sx={{ display: 'inline-block' }}>
         <NodBox
           nrInel={nod.nrInel}
-          nume={nod.nume}
+          rnc={nod.rnc}
           sex={nod.sex}
           mutatii={nod.mutatii}
           onClick={() => onNodeClick(nod.id)}

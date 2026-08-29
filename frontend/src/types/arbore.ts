@@ -3,7 +3,7 @@ import type { SexPasare } from './pasare';
 export interface NodArbore {
   id: string;
   nrInel: string;
-  nume: string | null;
+  rnc: string | null;
   sex: SexPasare;
   mutatii: string[];
   dataEclozare: string | null;

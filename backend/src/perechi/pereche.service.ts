@@ -7,7 +7,7 @@ import { UpdatePerecheDto } from './dto/update-pereche.dto';
 const PASARE_SELECT = {
   id: true,
   nrInel: true,
-  nume: true,
+  rnc: true,
   sex: true,
   mutatii: true,
   status: true,

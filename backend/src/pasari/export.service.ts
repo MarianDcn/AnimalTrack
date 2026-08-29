@@ -52,7 +52,7 @@ export class PasariExportService {
     doc.moveDown();
 
     doc.fontSize(12);
-    doc.text(`Nume: ${pasare.nume ?? '-'}`);
+    doc.text(`RNC: ${pasare.rnc ?? '-'}`);
     doc.text(`Sex: ${SEX_LABEL[pasare.sex] ?? pasare.sex}`);
     doc.text(`Data eclozarii: ${pasare.dataEclozare ? formatData(pasare.dataEclozare) : '-'}`);
     doc.text(`Mutatii: ${pasare.mutatii.length > 0 ? pasare.mutatii.join(', ') : '-'}`);
@@ -102,7 +102,7 @@ export class PasariExportService {
     const sheet = workbook.addWorksheet('Pasari');
     sheet.columns = [
       { header: 'Nr. inel', key: 'nrInel', width: 14 },
-      { header: 'Nume', key: 'nume', width: 18 },
+      { header: 'RNC', key: 'rnc', width: 18 },
       { header: 'Sex', key: 'sex', width: 12 },
       { header: 'Data eclozarii', key: 'dataEclozare', width: 14 },
       { header: 'Mutatii', key: 'mutatii', width: 24 },
@@ -117,7 +117,7 @@ export class PasariExportService {
     for (const p of pasari) {
       sheet.addRow({
         nrInel: p.nrInel,
-        nume: p.nume ?? '',
+        rnc: p.rnc ?? '',
         sex: SEX_LABEL[p.sex] ?? p.sex,
         dataEclozare: p.dataEclozare ? formatData(p.dataEclozare) : '',
         mutatii: p.mutatii.join(', '),

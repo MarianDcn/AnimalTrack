@@ -104,11 +104,11 @@ export function PerechiPage() {
                 >
                   <TableCell>
                     {p.mascul.nrInel}
-                    {p.mascul.nume ? ` - ${p.mascul.nume}` : ''}
+                    {p.mascul.rnc ? ` - ${p.mascul.rnc}` : ''}
                   </TableCell>
                   <TableCell>
                     {p.femela.nrInel}
-                    {p.femela.nume ? ` - ${p.femela.nume}` : ''}
+                    {p.femela.rnc ? ` - ${p.femela.rnc}` : ''}
                   </TableCell>
                   <TableCell>
                     <Chip

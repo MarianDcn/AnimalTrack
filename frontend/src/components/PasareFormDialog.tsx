@@ -25,7 +25,7 @@ interface Props {
 
 const STARE_INITIALA: PasareFormValues = {
   nrInel: '',
-  nume: '',
+  rnc: '',
   dataEclozare: '',
   sex: 'NECUNOSCUT',
   mutatii: [],
@@ -47,7 +47,7 @@ export function PasareFormDialog({ open, onClose, onSaved, pasare, pasariExisten
     if (pasare) {
       setValori({
         nrInel: pasare.nrInel,
-        nume: pasare.nume ?? '',
+        rnc: pasare.rnc ?? '',
         dataEclozare: pasare.dataEclozare ? pasare.dataEclozare.slice(0, 10) : '',
         sex: pasare.sex,
         mutatii: pasare.mutatii,
@@ -73,7 +73,7 @@ export function PasareFormDialog({ open, onClose, onSaved, pasare, pasariExisten
 
     const payload: PasareFormValues = {
       ...valori,
-      nume: valori.nume || undefined,
+      rnc: valori.rnc || undefined,
       dataEclozare: valori.dataEclozare || undefined,
       observatii: valori.observatii || undefined,
     };
@@ -171,7 +171,7 @@ export function PasareFormDialog({ open, onClose, onSaved, pasare, pasariExisten
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    label="Mutatii / culoare"
+                    label="Culoare / Mutatie"
                     helperText="Scrie o valoare si apasa Enter; poti adauga mai multe"
                   />
                 )}
@@ -211,10 +211,11 @@ export function PasareFormDialog({ open, onClose, onSaved, pasare, pasariExisten
 
             <Grid size={12}>
               <TextField
-                label="Nume (optional)"
+                label="RNC"
+                helperText="Identificator unic de crescator (optional)"
                 fullWidth
-                value={valori.nume}
-                onChange={(e) => actualizeaza('nume', e.target.value)}
+                value={valori.rnc}
+                onChange={(e) => actualizeaza('rnc', e.target.value)}
               />
             </Grid>
 

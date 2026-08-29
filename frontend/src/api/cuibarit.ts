@@ -5,6 +5,7 @@ import type {
   Ou,
   SerieCuibarit,
   StatusOu,
+  UpdateSerieValues,
 } from '../types/cuibarit';
 import { apiClient } from './client';
 
@@ -16,6 +17,18 @@ export async function creazaSerie(values: CreateSerieValues): Promise<SerieCuiba
 export async function getSerie(id: string): Promise<SerieCuibarit> {
   const { data } = await apiClient.get<SerieCuibarit>(`/serii/${id}`);
   return data;
+}
+
+export async function actualizeazaSerie(
+  id: string,
+  values: UpdateSerieValues,
+): Promise<SerieCuibarit> {
+  const { data } = await apiClient.patch<SerieCuibarit>(`/serii/${id}`, values);
+  return data;
+}
+
+export async function stergeSerie(id: string): Promise<void> {
+  await apiClient.delete(`/serii/${id}`);
 }
 
 export async function adaugaOu(serieId: string, values: CreateOuValues): Promise<Ou> {

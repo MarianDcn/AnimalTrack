@@ -59,7 +59,7 @@ export function QuickSearch() {
       renderOption={(props, optiune) => (
         <Box component="li" {...props} key={optiune.id} sx={{ display: 'block !important' }}>
           <Typography variant="body2" sx={{ fontWeight: 600 }}>
-            {optiune.nrInel} {optiune.nume ? `- ${optiune.nume}` : ''}
+            {optiune.nrInel} {optiune.rnc ? `- ${optiune.rnc}` : ''}
           </Typography>
           <Typography variant="caption" color="text.secondary">
             {SEX_LABEL[optiune.sex]}

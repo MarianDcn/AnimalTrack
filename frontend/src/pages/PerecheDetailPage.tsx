@@ -14,6 +14,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import Divider from '@mui/material/Divider';
 import Grid from '@mui/material/Grid';
+import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
 import MenuItem from '@mui/material/MenuItem';
 import Skeleton from '@mui/material/Skeleton';
@@ -24,7 +25,14 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import EggIcon from '@mui/icons-material/Egg';
-import { adaugaOu, actualizeazaStatusOu, creazaSerie, eclozeazaOu } from '../api/cuibarit';
+import {
+  actualizeazaSerie,
+  actualizeazaStatusOu,
+  adaugaOu,
+  creazaSerie,
+  eclozeazaOu,
+  stergeSerie,
+} from '../api/cuibarit';
 import { getPasari } from '../api/pasari';
 import { getPereche, getSeriiPereche, stergePereche } from '../api/perechi';
 import { PerecheFormDialog } from '../components/PerecheFormDialog';
@@ -61,6 +69,7 @@ export function PerecheDetailPage() {
   const [serii, setSerii] = useState<SerieCuibarit[] | null>(null);
   const [eroare, setEroare] = useState<string | null>(null);
   const [dialogSerieDeschis, setDialogSerieDeschis] = useState(false);
+  const [serieEditata, setSerieEditata] = useState<SerieCuibarit | null>(null);
   const [ouEclozare, setOuEclozare] = useState<Ou | null>(null);
   const [dialogEditareDeschis, setDialogEditareDeschis] = useState(false);
   const [toatePasarile, setToatePasarile] = useState<Pasare[]>([]);
@@ -93,6 +102,17 @@ export function PerecheDetailPage() {
 
   async function onSchimbaStatus(ouId: string, status: StatusOu) {
     await actualizeazaStatusOu(ouId, status);
+    incarca();
+  }
+
+  async function onStergeSerie(serie: SerieCuibarit) {
+    const confirmat = confirm(
+      serie.oua.length > 0
+        ? `Stergi aceasta serie de cuibarit? Se sterg si cele ${serie.oua.length} oua asociate.`
+        : 'Stergi aceasta serie de cuibarit?',
+    );
+    if (!confirmat) return;
+    await stergeSerie(serie.id);
     incarca();
   }
 
@@ -130,9 +150,9 @@ export function PerecheDetailPage() {
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 Mascul: {pereche.mascul.nrInel}
-                {pereche.mascul.nume ? ` (${pereche.mascul.nume})` : ''} · Femela:{' '}
+                {pereche.mascul.rnc ? ` (${pereche.mascul.rnc})` : ''} · Femela:{' '}
                 {pereche.femela.nrInel}
-                {pereche.femela.nume ? ` (${pereche.femela.nume})` : ''}
+                {pereche.femela.rnc ? ` (${pereche.femela.rnc})` : ''}
               </Typography>
             </Box>
             <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
@@ -178,9 +198,17 @@ export function PerecheDetailPage() {
                   {serie.dataPrimOu &&
                     ` · Primul ou: ${new Date(serie.dataPrimOu).toLocaleDateString('ro-RO')}`}
                 </Typography>
-                <Button size="small" startIcon={<EggIcon />} onClick={() => onAdaugaOu(serie.id)}>
-                  Adauga ou
-                </Button>
+                <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+                  <Button size="small" startIcon={<EggIcon />} onClick={() => onAdaugaOu(serie.id)}>
+                    Adauga ou
+                  </Button>
+                  <IconButton size="small" onClick={() => setSerieEditata(serie)}>
+                    <EditIcon fontSize="small" />
+                  </IconButton>
+                  <IconButton size="small" onClick={() => onStergeSerie(serie)}>
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </Stack>
               </Stack>
               <Divider sx={{ mb: 1 }} />
 
@@ -250,10 +278,18 @@ export function PerecheDetailPage() {
         )}
       </Stack>
 
-      <SerieNouaDialog
+      <SerieFormDialog
         open={dialogSerieDeschis}
         perecheId={pereche.id}
         onClose={() => setDialogSerieDeschis(false)}
+        onSaved={incarca}
+      />
+
+      <SerieFormDialog
+        open={serieEditata !== null}
+        perecheId={pereche.id}
+        serie={serieEditata}
+        onClose={() => setSerieEditata(null)}
         onSaved={incarca}
       />
 
@@ -271,32 +307,48 @@ export function PerecheDetailPage() {
   );
 }
 
-function SerieNouaDialog({
+function SerieFormDialog({
   open,
   perecheId,
+  serie,
   onClose,
   onSaved,
 }: {
   open: boolean;
   perecheId: string;
+  serie?: SerieCuibarit | null;
   onClose: () => void;
   onSaved: () => void;
 }) {
   const [dataImperechere, setDataImperechere] = useState('');
+  const [dataPrimOu, setDataPrimOu] = useState('');
   const [eroare, setEroare] = useState<string | null>(null);
+  const editare = !!serie;
 
   useEffect(() => {
     if (open) {
-      setDataImperechere(new Date().toISOString().slice(0, 10));
+      setDataImperechere(
+        serie?.dataImperechere?.slice(0, 10) ??
+          (editare ? '' : new Date().toISOString().slice(0, 10)),
+      );
+      setDataPrimOu(serie?.dataPrimOu?.slice(0, 10) ?? '');
       setEroare(null);
     }
-  }, [open]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, serie]);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setEroare(null);
     try {
-      await creazaSerie({ perecheId, dataImperechere: dataImperechere || undefined });
+      if (editare && serie) {
+        await actualizeazaSerie(serie.id, {
+          dataImperechere: dataImperechere || undefined,
+          dataPrimOu: dataPrimOu || undefined,
+        });
+      } else {
+        await creazaSerie({ perecheId, dataImperechere: dataImperechere || undefined });
+      }
       onSaved();
       onClose();
     } catch {
@@ -306,7 +358,7 @@ function SerieNouaDialog({
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle>Serie de cuibarit noua</DialogTitle>
+      <DialogTitle>{editare ? 'Editeaza seria de cuibarit' : 'Serie de cuibarit noua'}</DialogTitle>
       <form onSubmit={onSubmit}>
         <DialogContent>
           {eroare && (
@@ -314,14 +366,26 @@ function SerieNouaDialog({
               {eroare}
             </Alert>
           )}
-          <TextField
-            label="Data imperecherii"
-            type="date"
-            fullWidth
-            slotProps={{ inputLabel: { shrink: true } }}
-            value={dataImperechere}
-            onChange={(e) => setDataImperechere(e.target.value)}
-          />
+          <Stack spacing={2}>
+            <TextField
+              label="Data imperecherii"
+              type="date"
+              fullWidth
+              slotProps={{ inputLabel: { shrink: true } }}
+              value={dataImperechere}
+              onChange={(e) => setDataImperechere(e.target.value)}
+            />
+            {editare && (
+              <TextField
+                label="Data primului ou"
+                type="date"
+                fullWidth
+                slotProps={{ inputLabel: { shrink: true } }}
+                value={dataPrimOu}
+                onChange={(e) => setDataPrimOu(e.target.value)}
+              />
+            )}
+          </Stack>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
           <Button onClick={onClose}>Anuleaza</Button>
@@ -368,7 +432,7 @@ function EclozeazaDialog({
     try {
       await eclozeazaOu(ou.id, {
         ...valori,
-        nume: valori.nume || undefined,
+        rnc: valori.rnc || undefined,
         dataEclozare: valori.dataEclozare || undefined,
         observatii: valori.observatii || undefined,
       });
@@ -409,10 +473,10 @@ function EclozeazaDialog({
             </Grid>
             <Grid size={6}>
               <TextField
-                label="Nume (optional)"
+                label="RNC"
                 fullWidth
-                value={valori.nume ?? ''}
-                onChange={(e) => actualizeaza('nume', e.target.value)}
+                value={valori.rnc ?? ''}
+                onChange={(e) => actualizeaza('rnc', e.target.value)}
               />
             </Grid>
             <Grid size={6}>
@@ -448,7 +512,7 @@ function EclozeazaDialog({
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    label="Mutatii / culoare"
+                    label="Culoare / Mutatie"
                     helperText="Scrie o valoare si apasa Enter; poti adauga mai multe"
                   />
                 )}

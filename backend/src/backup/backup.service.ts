@@ -86,7 +86,7 @@ export class BackupService {
               id: p.id,
               fermaId,
               nrInel: p.nrInel,
-              nume: p.nume,
+              rnc: p.rnc,
               dataEclozare: p.dataEclozare ? new Date(p.dataEclozare) : null,
               sex: p.sex as never,
               mutatii: p.mutatii ?? [],

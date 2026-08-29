@@ -99,7 +99,7 @@ export function PerecheFormDialog({ open, onClose, onSaved, masculi, femele, per
             <Grid size={12}>
               <Autocomplete
                 options={masculi}
-                getOptionLabel={(o) => `${o.nrInel}${o.nume ? ` - ${o.nume}` : ''}`}
+                getOptionLabel={(o) => `${o.nrInel}${o.rnc ? ` - ${o.rnc}` : ''}`}
                 value={masculSelectat}
                 onChange={(_e, val) => setMasculId(val?.id ?? null)}
                 noOptionsText="Nu ai masculi disponibili"
@@ -109,7 +109,7 @@ export function PerecheFormDialog({ open, onClose, onSaved, masculi, femele, per
             <Grid size={12}>
               <Autocomplete
                 options={femele}
-                getOptionLabel={(o) => `${o.nrInel}${o.nume ? ` - ${o.nume}` : ''}`}
+                getOptionLabel={(o) => `${o.nrInel}${o.rnc ? ` - ${o.rnc}` : ''}`}
                 value={femelaSelectata}
                 onChange={(_e, val) => setFemelaId(val?.id ?? null)}
                 noOptionsText="Nu ai femele disponibile"

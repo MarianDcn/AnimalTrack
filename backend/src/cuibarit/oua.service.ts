@@ -67,7 +67,7 @@ export class OuaService {
           data: {
             fermaId,
             nrInel: dto.nrInel,
-            nume: dto.nume,
+            rnc: dto.rnc,
             dataEclozare: dto.dataEclozare,
             sex: dto.sex,
             mutatii: dto.mutatii ?? [],

@@ -6,7 +6,7 @@ export interface Pasare {
   id: string;
   fermaId: string;
   nrInel: string;
-  nume: string | null;
+  rnc: string | null;
   dataEclozare: string | null;
   sex: SexPasare;
   mutatii: string[];
@@ -20,7 +20,7 @@ export interface Pasare {
 
 export interface PasareFormValues {
   nrInel: string;
-  nume?: string;
+  rnc?: string;
   dataEclozare?: string;
   sex?: SexPasare;
   mutatii?: string[];
@@ -34,7 +34,7 @@ export interface PasareFormValues {
 export interface PasareCautareRezultat {
   id: string;
   nrInel: string;
-  nume: string | null;
+  rnc: string | null;
   dataEclozare: string | null;
   varsta: { ani: number; luni: number } | null;
   sex: SexPasare;

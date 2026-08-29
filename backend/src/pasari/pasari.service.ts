@@ -96,7 +96,7 @@ export class PasariService {
     return pasari.map((p) => ({
       id: p.id,
       nrInel: p.nrInel,
-      nume: p.nume,
+      rnc: p.rnc,
       dataEclozare: p.dataEclozare,
       varsta: calculeazaVarsta(p.dataEclozare),
       sex: p.sex,
@@ -135,13 +135,13 @@ export class PasariService {
 
     const stramosi = await this.prisma.$queryRaw<RandArbore[]>`
       WITH RECURSIVE stramosi AS (
-        SELECT id, nr_inel, nume, sex, mutatii, data_eclozare, tata_id, mama_id, 0 AS nivel
+        SELECT id, nr_inel, rnc, sex, mutatii, data_eclozare, tata_id, mama_id, 0 AS nivel
         FROM pasari
         WHERE id = ${id} AND ferma_id = ${fermaId}
 
         UNION ALL
 
-        SELECT p.id, p.nr_inel, p.nume, p.sex, p.mutatii, p.data_eclozare, p.tata_id, p.mama_id, s.nivel + 1
+        SELECT p.id, p.nr_inel, p.rnc, p.sex, p.mutatii, p.data_eclozare, p.tata_id, p.mama_id, s.nivel + 1
         FROM pasari p
         JOIN stramosi s ON p.id = s.tata_id OR p.id = s.mama_id
         WHERE s.nivel < ${generatiiSus} AND p.ferma_id = ${fermaId}
@@ -151,13 +151,13 @@ export class PasariService {
 
     const descendenti = await this.prisma.$queryRaw<RandArbore[]>`
       WITH RECURSIVE descendenti AS (
-        SELECT id, nr_inel, nume, sex, mutatii, data_eclozare, tata_id, mama_id, 0 AS nivel
+        SELECT id, nr_inel, rnc, sex, mutatii, data_eclozare, tata_id, mama_id, 0 AS nivel
         FROM pasari
         WHERE id = ${id} AND ferma_id = ${fermaId}
 
         UNION ALL
 
-        SELECT p.id, p.nr_inel, p.nume, p.sex, p.mutatii, p.data_eclozare, p.tata_id, p.mama_id, d.nivel + 1
+        SELECT p.id, p.nr_inel, p.rnc, p.sex, p.mutatii, p.data_eclozare, p.tata_id, p.mama_id, d.nivel + 1
         FROM pasari p
         JOIN descendenti d ON p.tata_id = d.id OR p.mama_id = d.id
         WHERE d.nivel < ${generatiiJos} AND p.ferma_id = ${fermaId}
@@ -176,7 +176,7 @@ export class PasariService {
       pasare: {
         id: pasare.id,
         nrInel: pasare.nrInel,
-        nume: pasare.nume,
+        rnc: pasare.rnc,
         sex: pasare.sex,
         mutatii: pasare.mutatii,
         dataEclozare: pasare.dataEclozare,
@@ -224,7 +224,7 @@ function calculeazaVarsta(dataEclozare: Date | null): { ani: number; luni: numbe
 export interface RandArbore {
   id: string;
   nr_inel: string;
-  nume: string | null;
+  rnc: string | null;
   sex: string;
   mutatii: string[];
   data_eclozare: Date | null;
@@ -236,7 +236,7 @@ export interface RandArbore {
 export interface NodArbore {
   id: string;
   nrInel: string;
-  nume: string | null;
+  rnc: string | null;
   sex: string;
   mutatii: string[];
   dataEclozare: Date | null;
@@ -255,7 +255,7 @@ function randSpreNod(r: RandArbore): NodArbore {
   return {
     id: r.id,
     nrInel: r.nr_inel,
-    nume: r.nume,
+    rnc: r.rnc,
     sex: r.sex,
     mutatii: r.mutatii,
     dataEclozare: r.data_eclozare,

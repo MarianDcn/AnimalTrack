@@ -25,13 +25,18 @@ export interface CreateSerieValues {
   dataImperechere?: string;
 }
 
+export interface UpdateSerieValues {
+  dataImperechere?: string;
+  dataPrimOu?: string;
+}
+
 export interface CreateOuValues {
   dataDepunere?: string;
 }
 
 export interface EclozeazaValues {
   nrInel: string;
-  nume?: string;
+  rnc?: string;
   dataEclozare?: string;
   sex?: SexPasare;
   mutatii?: string[];
