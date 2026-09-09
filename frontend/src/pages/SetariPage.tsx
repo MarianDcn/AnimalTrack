@@ -26,6 +26,7 @@ import {
   getBackupuriAutomate,
   restoreBackup,
 } from '../api/backup';
+import { trimiteSugestie } from '../api/sugestii';
 import type { BackupAutomatInfo } from '../types/backup';
 
 const CUVANT_CONFIRMARE = 'STERGE';
@@ -41,6 +42,11 @@ export function SetariPage() {
 
   const [backupuriAuto, setBackupuriAuto] = useState<BackupAutomatInfo[] | null>(null);
   const [eroareAuto, setEroareAuto] = useState<string | null>(null);
+
+  const [mesajSugestie, setMesajSugestie] = useState('');
+  const [seTrimiteSugestie, setSeTrimiteSugestie] = useState(false);
+  const [eroareSugestie, setEroareSugestie] = useState<string | null>(null);
+  const [sugestieTrimisa, setSugestieTrimisa] = useState(false);
 
   useEffect(() => {
     getBackupuriAutomate()
@@ -73,6 +79,24 @@ export function SetariPage() {
     setDialogDeschis(false);
     setTextConfirmare('');
     setEroareRestaurare(null);
+  }
+
+  async function onTrimiteSugestie() {
+    if (!mesajSugestie.trim()) return;
+    setSeTrimiteSugestie(true);
+    setEroareSugestie(null);
+    try {
+      await trimiteSugestie({ mesaj: mesajSugestie.trim() });
+      setMesajSugestie('');
+      setSugestieTrimisa(true);
+    } catch (err: unknown) {
+      const mesaj =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+        'Trimiterea a esuat';
+      setEroareSugestie(Array.isArray(mesaj) ? mesaj.join(', ') : mesaj);
+    } finally {
+      setSeTrimiteSugestie(false);
+    }
   }
 
   async function onConfirmaRestaurare() {
@@ -187,6 +211,46 @@ export function SetariPage() {
                 ))}
               </List>
             )}
+          </CardContent>
+        </Card>
+
+        <Card variant="outlined">
+          <CardContent>
+            <Typography variant="h6" sx={{ mb: 1 }}>
+              Sugestii pentru dezvoltare
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              Ai o idee de imbunatatire sau ai observat ceva ce nu functioneaza cum trebuie? Scrie
+              mai jos, mesajul ajunge direct la dezvoltator.
+            </Typography>
+
+            {sugestieTrimisa && (
+              <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSugestieTrimisa(false)}>
+                Multumim! Sugestia ta a fost trimisa.
+              </Alert>
+            )}
+            {eroareSugestie && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {eroareSugestie}
+              </Alert>
+            )}
+
+            <TextField
+              fullWidth
+              multiline
+              minRows={3}
+              placeholder="Scrie aici sugestia sau problema intalnita..."
+              value={mesajSugestie}
+              onChange={(e) => setMesajSugestie(e.target.value)}
+              sx={{ mb: 2 }}
+            />
+            <Button
+              variant="contained"
+              onClick={onTrimiteSugestie}
+              disabled={seTrimiteSugestie || mesajSugestie.trim().length < 3}
+            >
+              Trimite sugestia
+            </Button>
           </CardContent>
         </Card>
       </Stack>

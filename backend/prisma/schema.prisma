@@ -60,6 +60,7 @@ model Ferma {
   utilizatori Utilizator[]
   pasari      Pasare[]
   perechi     Pereche[]
+  sugestii    Sugestie[]
 
   @@map("ferme")
 }
@@ -72,9 +73,23 @@ model Utilizator {
   rol        RolUtilizator @default(ADMIN)
   dataCreare DateTime      @default(now()) @map("data_creare")
 
-  ferma Ferma @relation(fields: [fermaId], references: [id], onDelete: Cascade)
+  ferma    Ferma      @relation(fields: [fermaId], references: [id], onDelete: Cascade)
+  sugestii Sugestie[]
 
   @@map("utilizatori")
+}
+
+model Sugestie {
+  id           String   @id @default(uuid())
+  fermaId      String   @map("ferma_id")
+  utilizatorId String   @map("utilizator_id")
+  mesaj        String
+  dataCreare   DateTime @default(now()) @map("data_creare")
+
+  ferma      Ferma      @relation(fields: [fermaId], references: [id], onDelete: Cascade)
+  utilizator Utilizator @relation(fields: [utilizatorId], references: [id], onDelete: Cascade)
+
+  @@map("sugestii")
 }
 
 model Pasare {

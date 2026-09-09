@@ -12,6 +12,7 @@ import { PerecheModule } from './perechi/pereche.module';
 import { CuibaritModule } from './cuibarit/cuibarit.module';
 import { StatisticiModule } from './statistici/statistici.module';
 import { BackupModule } from './backup/backup.module';
+import { SugestiiModule } from './sugestii/sugestii.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { BackupModule } from './backup/backup.module';
     CuibaritModule,
     StatisticiModule,
     BackupModule,
+    SugestiiModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
