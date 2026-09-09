@@ -137,7 +137,11 @@ export function PerecheDetailPage() {
 
       <Card sx={{ mb: 3 }}>
         <CardContent>
-          <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={2}
+            sx={{ justifyContent: 'space-between', alignItems: { xs: 'stretch', sm: 'center' } }}
+          >
             <Box>
               <Typography variant="h5" sx={{ fontWeight: 600 }}>
                 <Link component={RouterLink} to={`/pasari/${pereche.mascul.id}`} underline="hover">
@@ -155,7 +159,7 @@ export function PerecheDetailPage() {
                 {pereche.femela.rnc ? ` (${pereche.femela.rnc})` : ''}
               </Typography>
             </Box>
-            <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+            <Stack direction="row" spacing={1} sx={{ alignItems: 'center', flexWrap: 'wrap', rowGap: 1 }}>
               <Chip
                 label={pereche.status === 'ACTIVA' ? 'Activa' : 'Inactiva'}
                 color={pereche.status === 'ACTIVA' ? 'success' : 'default'}
@@ -175,7 +179,16 @@ export function PerecheDetailPage() {
         </CardContent>
       </Card>
 
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          justifyContent: 'space-between',
+          alignItems: { xs: 'stretch', sm: 'center' },
+          gap: 1,
+          mb: 2,
+        }}
+      >
         <Typography variant="h6">Serii de cuibarit</Typography>
         <Button variant="contained" size="small" onClick={() => setDialogSerieDeschis(true)}>
           Serie noua
@@ -187,8 +200,9 @@ export function PerecheDetailPage() {
           <Card key={serie.id} variant="outlined">
             <CardContent>
               <Stack
-                direction="row"
-                sx={{ justifyContent: 'space-between', alignItems: 'center', mb: 1 }}
+                direction={{ xs: 'column', sm: 'row' }}
+                spacing={1}
+                sx={{ justifyContent: 'space-between', alignItems: { xs: 'stretch', sm: 'center' }, mb: 1 }}
               >
                 <Typography variant="subtitle1">
                   Seria {index + 1} — Imperechere:{' '}
@@ -198,7 +212,7 @@ export function PerecheDetailPage() {
                   {serie.dataPrimOu &&
                     ` · Primul ou: ${new Date(serie.dataPrimOu).toLocaleDateString('ro-RO')}`}
                 </Typography>
-                <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+                <Stack direction="row" spacing={1} sx={{ alignItems: 'center', flexWrap: 'wrap', rowGap: 1 }}>
                   <Button size="small" startIcon={<EggIcon />} onClick={() => onAdaugaOu(serie.id)}>
                     Adauga ou
                   </Button>
@@ -224,7 +238,7 @@ export function PerecheDetailPage() {
                     key={ou.id}
                     direction="row"
                     spacing={2}
-                    sx={{ alignItems: 'center', py: 0.5 }}
+                    sx={{ alignItems: 'center', py: 0.5, flexWrap: 'wrap', rowGap: 1 }}
                   >
                     <Typography variant="body2" sx={{ minWidth: 110 }}>
                       {new Date(ou.dataDepunere).toLocaleDateString('ro-RO')}

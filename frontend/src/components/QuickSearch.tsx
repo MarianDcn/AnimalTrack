@@ -14,7 +14,7 @@ const SEX_LABEL: Record<string, string> = {
   NECUNOSCUT: 'Necunoscut',
 };
 
-export function QuickSearch() {
+export function QuickSearch({ onNavigat }: { onNavigat?: () => void } = {}) {
   const navigate = useNavigate();
   const [input, setInput] = useState('');
   const [optiuni, setOptiuni] = useState<PasareCautareRezultat[]>([]);
@@ -45,7 +45,7 @@ export function QuickSearch() {
 
   return (
     <Autocomplete
-      sx={{ width: 340 }}
+      sx={{ width: { xs: '100%', md: 340 } }}
       options={optiuni}
       loading={seIncarca}
       filterOptions={(x) => x}
@@ -54,7 +54,10 @@ export function QuickSearch() {
       noOptionsText={input ? 'Nicio pasare gasita' : 'Cauta dupa nr. inel'}
       onInputChange={(_e, valoare) => setInput(valoare)}
       onChange={(_e, valoare) => {
-        if (valoare) navigate(`/pasari/${valoare.id}`);
+        if (valoare) {
+          navigate(`/pasari/${valoare.id}`);
+          onNavigat?.();
+        }
       }}
       renderOption={(props, optiune) => (
         <Box component="li" {...props} key={optiune.id} sx={{ display: 'block !important' }}>

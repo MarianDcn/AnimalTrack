@@ -1,19 +1,39 @@
+import { useState } from 'react';
 import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import Divider from '@mui/material/Divider';
+import Drawer from '@mui/material/Drawer';
 import IconButton from '@mui/material/IconButton';
+import List from '@mui/material/List';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemText from '@mui/material/ListItemText';
 import Toolbar from '@mui/material/Toolbar';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import LogoutIcon from '@mui/icons-material/Logout';
+import MenuIcon from '@mui/icons-material/Menu';
 import { useAuth } from '../auth/AuthContext';
 import { QuickSearch } from './QuickSearch';
+
+const LINKURI = [
+  { to: '/', label: 'Dashboard' },
+  { to: '/pasari', label: 'Pasari' },
+  { to: '/perechi', label: 'Perechi' },
+  { to: '/statistici', label: 'Statistici' },
+  { to: '/setari', label: 'Setari' },
+];
 
 export function Header() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [drawerDeschis, setDrawerDeschis] = useState(false);
+
+  function esteActiv(to: string) {
+    return to === '/' ? location.pathname === '/' : location.pathname.startsWith(to);
+  }
 
   function onLogout() {
     logout();
@@ -22,57 +42,44 @@ export function Header() {
 
   return (
     <AppBar position="static" color="primary" elevation={1}>
-      <Toolbar sx={{ gap: 2 }}>
+      <Toolbar sx={{ gap: { xs: 1, md: 2 } }}>
+        <IconButton
+          color="inherit"
+          edge="start"
+          onClick={() => setDrawerDeschis(true)}
+          sx={{ display: { xs: 'inline-flex', md: 'none' } }}
+        >
+          <MenuIcon />
+        </IconButton>
+
         <Typography variant="h6" sx={{ fontWeight: 700, whiteSpace: 'nowrap' }}>
           AnimalTrack
         </Typography>
 
-        <Button
-          component={RouterLink}
-          to="/"
-          color="inherit"
-          sx={{ opacity: location.pathname === '/' ? 1 : 0.75 }}
-        >
-          Dashboard
-        </Button>
-        <Button
-          component={RouterLink}
-          to="/pasari"
-          color="inherit"
-          sx={{ opacity: location.pathname.startsWith('/pasari') ? 1 : 0.75 }}
-        >
-          Pasari
-        </Button>
-        <Button
-          component={RouterLink}
-          to="/perechi"
-          color="inherit"
-          sx={{ opacity: location.pathname.startsWith('/perechi') ? 1 : 0.75 }}
-        >
-          Perechi
-        </Button>
-        <Button
-          component={RouterLink}
-          to="/statistici"
-          color="inherit"
-          sx={{ opacity: location.pathname.startsWith('/statistici') ? 1 : 0.75 }}
-        >
-          Statistici
-        </Button>
-        <Button
-          component={RouterLink}
-          to="/setari"
-          color="inherit"
-          sx={{ opacity: location.pathname.startsWith('/setari') ? 1 : 0.75 }}
-        >
-          Setari
-        </Button>
+        <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
+          {LINKURI.map((l) => (
+            <Button
+              key={l.to}
+              component={RouterLink}
+              to={l.to}
+              color="inherit"
+              sx={{ opacity: esteActiv(l.to) ? 1 : 0.75 }}
+            >
+              {l.label}
+            </Button>
+          ))}
+        </Box>
 
         <Box sx={{ flexGrow: 1 }} />
 
-        <QuickSearch />
+        <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+          <QuickSearch />
+        </Box>
 
-        <Typography variant="body2" sx={{ ml: 1, whiteSpace: 'nowrap' }}>
+        <Typography
+          variant="body2"
+          sx={{ ml: 1, whiteSpace: 'nowrap', display: { xs: 'none', sm: 'block' } }}
+        >
           {user?.email}
         </Typography>
         <Tooltip title="Delogare">
@@ -81,6 +88,34 @@ export function Header() {
           </IconButton>
         </Tooltip>
       </Toolbar>
+
+      <Drawer anchor="left" open={drawerDeschis} onClose={() => setDrawerDeschis(false)}>
+        <Box sx={{ width: 280 }} role="presentation">
+          <Box sx={{ p: 2 }}>
+            <Typography variant="subtitle2" color="text.secondary" noWrap>
+              {user?.email}
+            </Typography>
+          </Box>
+          <Divider />
+          <List>
+            {LINKURI.map((l) => (
+              <ListItemButton
+                key={l.to}
+                component={RouterLink}
+                to={l.to}
+                selected={esteActiv(l.to)}
+                onClick={() => setDrawerDeschis(false)}
+              >
+                <ListItemText primary={l.label} />
+              </ListItemButton>
+            ))}
+          </List>
+          <Divider />
+          <Box sx={{ p: 2 }}>
+            <QuickSearch onNavigat={() => setDrawerDeschis(false)} />
+          </Box>
+        </Box>
+      </Drawer>
     </AppBar>
   );
 }

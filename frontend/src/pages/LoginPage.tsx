@@ -40,9 +40,15 @@ export function LoginPage() {
         alignItems: 'center',
         justifyContent: 'center',
         bgcolor: 'grey.100',
+        px: 2,
       }}
     >
-      <Paper component="form" onSubmit={onSubmit} sx={{ p: 4, width: 360 }} elevation={3}>
+      <Paper
+        component="form"
+        onSubmit={onSubmit}
+        sx={{ p: { xs: 3, sm: 4 }, width: '100%', maxWidth: 360 }}
+        elevation={3}
+      >
         <Typography variant="h5" sx={{ fontWeight: 600 }} gutterBottom>
           AnimalTrack
         </Typography>

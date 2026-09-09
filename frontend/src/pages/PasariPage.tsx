@@ -189,20 +189,35 @@ export function PasariPage() {
 
   return (
     <>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          justifyContent: 'space-between',
+          alignItems: { xs: 'stretch', sm: 'center' },
+          gap: 1.5,
+          mb: 3,
+        }}
+      >
         <Typography variant="h4" sx={{ fontWeight: 600 }}>
           Pasari
         </Typography>
-        <Box sx={{ display: 'flex', gap: 1 }}>
+        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
           <Button
             variant="outlined"
             startIcon={<FileDownloadIcon />}
             onClick={onExportExcel}
             disabled={seExporta}
+            sx={{ flex: { xs: 1, sm: 'initial' } }}
           >
             Export Excel
           </Button>
-          <Button variant="contained" startIcon={<AddIcon />} onClick={onAdauga}>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={onAdauga}
+            sx={{ flex: { xs: 1, sm: 'initial' } }}
+          >
             Adauga pasare
           </Button>
         </Box>
@@ -214,7 +229,7 @@ export function PasariPage() {
         <Skeleton variant="rounded" height={300} />
       ) : (
         <TableContainer component={Paper}>
-          <Table>
+          <Table size="small">
             <TableHead>
               <TableRow>
                 <TableCell>

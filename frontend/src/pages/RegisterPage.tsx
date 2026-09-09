@@ -45,9 +45,16 @@ export function RegisterPage() {
         alignItems: 'center',
         justifyContent: 'center',
         bgcolor: 'grey.100',
+        px: 2,
+        py: 4,
       }}
     >
-      <Paper component="form" onSubmit={onSubmit} sx={{ p: 4, width: 400 }} elevation={3}>
+      <Paper
+        component="form"
+        onSubmit={onSubmit}
+        sx={{ p: { xs: 3, sm: 4 }, width: '100%', maxWidth: 400 }}
+        elevation={3}
+      >
         <Typography variant="h5" sx={{ fontWeight: 600 }} gutterBottom>
           Inregistreaza crescatoria
         </Typography>

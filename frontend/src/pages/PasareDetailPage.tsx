@@ -111,8 +111,9 @@ export function PasareDetailPage() {
       <Card sx={{ mb: 3 }}>
         <CardContent>
           <Stack
-            direction="row"
-            sx={{ justifyContent: 'space-between', alignItems: 'flex-start' }}
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={2}
+            sx={{ justifyContent: 'space-between', alignItems: { xs: 'stretch', sm: 'flex-start' } }}
           >
             <Box>
               <Typography variant="h5" sx={{ fontWeight: 600 }}>
@@ -134,7 +135,7 @@ export function PasareDetailPage() {
                 variant="outlined"
               />
             </Box>
-            <Stack direction="row" spacing={1}>
+            <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', rowGap: 1 }}>
               <Button startIcon={<AccountTreeIcon />} onClick={() => setArboreDeschis(true)}>
                 Vezi arbore genealogic
               </Button>
