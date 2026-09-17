@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import Alert from '@mui/material/Alert';
+import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
@@ -15,8 +16,11 @@ import ListItemText from '@mui/material/ListItemText';
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
+import CheckIcon from '@mui/icons-material/Check';
 import DownloadIcon from '@mui/icons-material/Download';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 import RestoreIcon from '@mui/icons-material/Restore';
@@ -28,10 +32,17 @@ import {
 } from '../api/backup';
 import { trimiteSugestie } from '../api/sugestii';
 import type { BackupAutomatInfo } from '../types/backup';
+import {
+  CULORI_PRESTABILITE,
+  PREFERINTE_IMPLICITE,
+  usePreferinte,
+} from '../preferinte/PreferinteContext';
+import type { DensitateTabel, TemaMod } from '../preferinte/PreferinteContext';
 
 const CUVANT_CONFIRMARE = 'STERGE';
 
 export function SetariPage() {
+  const { preferinte, actualizeazaPreferinte, reseteazaPreferinte } = usePreferinte();
   const [seExportaBackup, setSeExportaBackup] = useState(false);
   const [fisierSelectat, setFisierSelectat] = useState<File | null>(null);
   const [dialogDeschis, setDialogDeschis] = useState(false);
@@ -127,6 +138,112 @@ export function SetariPage() {
       </Typography>
 
       <Stack spacing={3}>
+        <Card variant="outlined">
+          <CardContent>
+            <Stack
+              direction="row"
+              sx={{ justifyContent: 'space-between', alignItems: 'center', mb: 2 }}
+            >
+              <Typography variant="h6">Aspect</Typography>
+              <Button
+                size="small"
+                onClick={reseteazaPreferinte}
+                disabled={
+                  preferinte.tema === PREFERINTE_IMPLICITE.tema &&
+                  preferinte.culoarePrincipala === PREFERINTE_IMPLICITE.culoarePrincipala &&
+                  preferinte.densitateTabele === PREFERINTE_IMPLICITE.densitateTabele
+                }
+              >
+                Reseteaza la implicit
+              </Button>
+            </Stack>
+
+            <Typography variant="subtitle2" sx={{ mb: 1 }}>
+              Tema
+            </Typography>
+            <ToggleButtonGroup
+              size="small"
+              exclusive
+              value={preferinte.tema}
+              onChange={(_e, v: TemaMod | null) => v && actualizeazaPreferinte({ tema: v })}
+              sx={{ mb: 3 }}
+            >
+              <ToggleButton value="deschis">Deschis</ToggleButton>
+              <ToggleButton value="intunecat">Intunecat</ToggleButton>
+              <ToggleButton value="automat">Automat</ToggleButton>
+            </ToggleButtonGroup>
+
+            <Typography variant="subtitle2" sx={{ mb: 1 }}>
+              Culoare principala
+            </Typography>
+            <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', mb: 3, flexWrap: 'wrap', rowGap: 1 }}>
+              {CULORI_PRESTABILITE.map((c) => (
+                <Tooltip key={c.valoare} title={c.nume}>
+                  <Box
+                    onClick={() => actualizeazaPreferinte({ culoarePrincipala: c.valoare })}
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: '50%',
+                      bgcolor: c.valoare,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      border: '2px solid',
+                      borderColor:
+                        preferinte.culoarePrincipala.toLowerCase() === c.valoare.toLowerCase()
+                          ? 'text.primary'
+                          : 'transparent',
+                    }}
+                  >
+                    {preferinte.culoarePrincipala.toLowerCase() === c.valoare.toLowerCase() && (
+                      <CheckIcon sx={{ color: '#fff', fontSize: 18 }} />
+                    )}
+                  </Box>
+                </Tooltip>
+              ))}
+              <Tooltip title="Culoare personalizata">
+                <Box
+                  component="label"
+                  sx={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: '50%',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    border: '2px dashed',
+                    borderColor: 'divider',
+                    overflow: 'hidden',
+                  }}
+                >
+                  <input
+                    type="color"
+                    value={preferinte.culoarePrincipala}
+                    onChange={(e) => actualizeazaPreferinte({ culoarePrincipala: e.target.value })}
+                    style={{ width: 40, height: 40, border: 'none', cursor: 'pointer', padding: 0 }}
+                  />
+                </Box>
+              </Tooltip>
+            </Stack>
+
+            <Typography variant="subtitle2" sx={{ mb: 1 }}>
+              Densitate tabele
+            </Typography>
+            <ToggleButtonGroup
+              size="small"
+              exclusive
+              value={preferinte.densitateTabele}
+              onChange={(_e, v: DensitateTabel | null) => v && actualizeazaPreferinte({ densitateTabele: v })}
+            >
+              <ToggleButton value="compacta">Compacta</ToggleButton>
+              <ToggleButton value="confortabila">Confortabila</ToggleButton>
+            </ToggleButtonGroup>
+          </CardContent>
+        </Card>
+
         <Card variant="outlined">
           <CardContent>
             <Typography variant="h6" sx={{ mb: 1 }}>

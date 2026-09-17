@@ -30,10 +30,10 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { exportPasariExcel, getPasari, stergePasare } from '../api/pasari';
-import type { Pasare, StatusPasare } from '../types/pasare';
+import type { Pasare, SexPasare, StatusPasare } from '../types/pasare';
 import { PasareFormDialog } from '../components/PasareFormDialog';
 
-const SEX_LABEL: Record<string, string> = {
+const SEX_LABEL: Record<SexPasare, string> = {
   MASCUL: 'Mascul',
   FEMELA: 'Femela',
   NECUNOSCUT: 'Necunoscut',
@@ -48,6 +48,7 @@ const STATUS_LABEL: Record<StatusPasare, string> = {
 };
 
 const TOATE_STATUSURILE = Object.keys(STATUS_LABEL) as StatusPasare[];
+const TOATE_SEXELE = Object.keys(SEX_LABEL) as SexPasare[];
 
 type CampSortare = 'nrInel' | 'dataEclozare' | null;
 
@@ -67,10 +68,12 @@ export function PasariPage() {
   const [statusuriFiltrate, setStatusuriFiltrate] = useState<Set<StatusPasare>>(
     new Set(['ACTIVA']),
   );
+  const [sexeFiltrate, setSexeFiltrate] = useState<Set<SexPasare>>(new Set(TOATE_SEXELE));
 
   const [anchorAn, setAnchorAn] = useState<HTMLElement | null>(null);
   const [anchorMutatii, setAnchorMutatii] = useState<HTMLElement | null>(null);
   const [anchorStatus, setAnchorStatus] = useState<HTMLElement | null>(null);
+  const [anchorSex, setAnchorSex] = useState<HTMLElement | null>(null);
 
   async function incarca() {
     try {
@@ -137,6 +140,15 @@ export function PasariPage() {
     });
   }
 
+  function comutaSex(s: SexPasare) {
+    setSexeFiltrate((prev) => {
+      const next = new Set(prev);
+      if (next.has(s)) next.delete(s);
+      else next.add(s);
+      return next;
+    });
+  }
+
   const aniDisponibili = useMemo(() => {
     if (!pasari) return [];
     const ani = new Set<number>();
@@ -160,6 +172,7 @@ export function PasariPage() {
 
     let rezultat = pasari.filter((p) => {
       if (statusuriFiltrate.size > 0 && !statusuriFiltrate.has(p.status)) return false;
+      if (sexeFiltrate.size > 0 && !sexeFiltrate.has(p.sex)) return false;
       if (mutatiiFiltrate.size > 0 && !p.mutatii.some((m) => mutatiiFiltrate.has(m))) return false;
       if (anFiltrat !== 'toate') {
         const an = p.dataEclozare ? new Date(p.dataEclozare).getFullYear() : null;
@@ -183,9 +196,18 @@ export function PasariPage() {
     }
 
     return rezultat;
-  }, [pasari, statusuriFiltrate, mutatiiFiltrate, anFiltrat, campSortare, directieSortare]);
+  }, [
+    pasari,
+    statusuriFiltrate,
+    sexeFiltrate,
+    mutatiiFiltrate,
+    anFiltrat,
+    campSortare,
+    directieSortare,
+  ]);
 
   const statusEsteImplicit = statusuriFiltrate.size === 1 && statusuriFiltrate.has('ACTIVA');
+  const sexEsteImplicit = TOATE_SEXELE.every((s) => sexeFiltrate.has(s));
 
   return (
     <>
@@ -229,7 +251,7 @@ export function PasariPage() {
         <Skeleton variant="rounded" height={300} />
       ) : (
         <TableContainer component={Paper}>
-          <Table size="small">
+          <Table>
             <TableHead>
               <TableRow>
                 <TableCell>
@@ -242,7 +264,19 @@ export function PasariPage() {
                   </TableSortLabel>
                 </TableCell>
                 <TableCell>Rnc</TableCell>
-                <TableCell>Sex</TableCell>
+                <TableCell>
+                  <Stack direction="row" spacing={0} sx={{ alignItems: 'center' }}>
+                    Sex
+                    <Tooltip title="Filtreaza dupa sex">
+                      <IconButton size="small" onClick={(e) => setAnchorSex(e.currentTarget)}>
+                        <FilterListIcon
+                          fontSize="inherit"
+                          color={!sexEsteImplicit ? 'primary' : 'inherit'}
+                        />
+                      </IconButton>
+                    </Tooltip>
+                  </Stack>
+                </TableCell>
                 <TableCell>
                   <Stack direction="row" spacing={0} sx={{ alignItems: 'center' }}>
                     <TableSortLabel
@@ -425,6 +459,32 @@ export function PasariPage() {
                   />
                 }
                 label={STATUS_LABEL[s]}
+              />
+            ))}
+          </FormGroup>
+        </Box>
+      </Popover>
+
+      <Popover anchorEl={anchorSex} open={!!anchorSex} onClose={() => setAnchorSex(null)}>
+        <Box sx={{ p: 1.5, minWidth: 180 }}>
+          <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+            <Typography variant="subtitle2">Filtreaza sex</Typography>
+            <Button size="small" onClick={() => setSexeFiltrate(new Set(TOATE_SEXELE))}>
+              Ambele
+            </Button>
+          </Stack>
+          <FormGroup>
+            {TOATE_SEXELE.map((s) => (
+              <FormControlLabel
+                key={s}
+                control={
+                  <Checkbox
+                    size="small"
+                    checked={sexeFiltrate.has(s)}
+                    onChange={() => comutaSex(s)}
+                  />
+                }
+                label={SEX_LABEL[s]}
               />
             ))}
           </FormGroup>

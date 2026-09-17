@@ -93,7 +93,7 @@ export function PerechiPage() {
         <Skeleton variant="rounded" height={300} />
       ) : (
         <TableContainer component={Paper}>
-          <Table size="small">
+          <Table>
             <TableHead>
               <TableRow>
                 <TableCell>Mascul</TableCell>
