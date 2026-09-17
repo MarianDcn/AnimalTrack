@@ -1,65 +1,118 @@
-﻿import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import type { ArboreGenealogic as ArboreGenealogicTip, NodDescendent, NodStramos } from '../types/arbore';
+import type {
+  ArboreGenealogic as ArboreGenealogicTip,
+  NodArbore,
+  NodDescendent,
+  NodStramos,
+} from '../types/arbore';
 
-const COL_WIDTH = 190;
-const BOX_W = 156;
-const BOX_H_BAZA = 30;
-const LINIE_MUTATIE_H = 14;
+export type OrientareArbore = 'orizontala' | 'verticala';
+
+const BOX_W = 160;
+const BOX_H_BAZA = 34;
+const LINIE_MUTATIE_H = 15;
 const MAX_LINII_MUTATII = 3;
-const LEAF_ROW_H = 92;
+const BOX_H_MAX = BOX_H_BAZA + MAX_LINII_MUTATII * LINIE_MUTATIE_H;
+
+const GEN_GAP = 70;
+const SLOT_GAP = 24;
+
+const PAS_GENERATIE: Record<OrientareArbore, number> = {
+  orizontala: BOX_W + GEN_GAP,
+  verticala: BOX_H_MAX + GEN_GAP,
+};
+const PAS_SLOT: Record<OrientareArbore, number> = {
+  orizontala: BOX_H_MAX + SLOT_GAP,
+  verticala: BOX_W + SLOT_GAP,
+};
 
 const SEX_CULOARE: Record<string, string> = {
   MASCUL: '#1565c0',
   FEMELA: '#ad1457',
-  NECUNOSCUT: '#616161',
+  NECUNOSCUT: '#757575',
 };
+
+const SEX_LABEL: Record<string, string> = {
+  MASCUL: 'Mascul',
+  FEMELA: 'Femela',
+  NECUNOSCUT: 'Necunoscut',
+};
+
+interface NodCuCopii extends NodArbore {
+  copii: NodCuCopii[];
+}
+
+interface NodPozitionat extends NodArbore {
+  generatie: number;
+  pozitieUnit: number;
+}
+
+interface Muchie {
+  parinteId: string;
+  copilId: string;
+}
 
 function inaltimeCasuta(nrMutatii: number): number {
   return BOX_H_BAZA + Math.min(nrMutatii, MAX_LINII_MUTATII) * LINIE_MUTATIE_H;
 }
 
-interface NodPozitionat {
-  id: string;
-  nrInel: string;
-  rnc: string | null;
-  sex: string;
-  mutatii: string[];
-  generatie: number;
-  slot: number;
-  areTata: boolean;
-  areMama: boolean;
+function stramosSpreCopii(nod: NodStramos | null): NodCuCopii | null {
+  if (!nod) return null;
+  const copii: NodCuCopii[] = [];
+  const tata = stramosSpreCopii(nod.tata);
+  const mama = stramosSpreCopii(nod.mama);
+  if (tata) copii.push(tata);
+  if (mama) copii.push(mama);
+  return { ...nod, copii };
 }
 
-function aplatizeaza(
-  nod: NodStramos | null,
+function construiesteRadacina(
+  arbore: ArboreGenealogicTip,
+  mod: 'stramosi' | 'descendenti',
+): NodCuCopii {
+  if (mod === 'descendenti') {
+    return { ...arbore.pasare, copii: arbore.descendenti as NodDescendent[] as NodCuCopii[] };
+  }
+  const copii: NodCuCopii[] = [];
+  const tata = stramosSpreCopii(arbore.stramosi.tata);
+  const mama = stramosSpreCopii(arbore.stramosi.mama);
+  if (tata) copii.push(tata);
+  if (mama) copii.push(mama);
+  return { ...arbore.pasare, copii };
+}
+
+function aseazaArbore(
+  nod: NodCuCopii,
   generatie: number,
-  slot: number,
-  acumulator: NodPozitionat[],
-) {
-  if (!nod) return;
-  acumulator.push({
-    id: nod.id,
-    nrInel: nod.nrInel,
-    rnc: nod.rnc,
-    sex: nod.sex,
-    mutatii: nod.mutatii,
-    generatie,
-    slot,
-    areTata: !!nod.tata,
-    areMama: !!nod.mama,
-  });
-  aplatizeaza(nod.tata, generatie + 1, slot * 2, acumulator);
-  aplatizeaza(nod.mama, generatie + 1, slot * 2 + 1, acumulator);
+  start: number,
+  noduri: NodPozitionat[],
+  muchii: Muchie[],
+): number {
+  if (nod.copii.length === 0) {
+    noduri.push({ ...nod, generatie, pozitieUnit: start + 0.5 });
+    return 1;
+  }
+
+  let cursor = start;
+  const centre: number[] = [];
+  for (const copil of nod.copii) {
+    const latime = aseazaArbore(copil, generatie + 1, cursor, noduri, muchii);
+    centre.push(cursor + latime / 2);
+    cursor += latime;
+    muchii.push({ parinteId: nod.id, copilId: copil.id });
+  }
+  const pozitieUnit = (centre[0] + centre[centre.length - 1]) / 2;
+  noduri.push({ ...nod, generatie, pozitieUnit });
+  return Math.max(cursor - start, 1);
 }
 
-function pozitie(generatie: number, slot: number, generatiiTotale: number) {
-  const totalInaltime = LEAF_ROW_H * 2 ** generatiiTotale;
-  const inaltimeSlot = totalInaltime / 2 ** generatie;
-  const x = generatie * COL_WIDTH;
-  const y = (slot + 0.5) * inaltimeSlot;
-  return { x, y, totalInaltime };
+function coordonate(generatie: number, pozitieUnit: number, orientare: OrientareArbore) {
+  if (orientare === 'orizontala') {
+    return { x: generatie * PAS_GENERATIE.orizontala, y: pozitieUnit * PAS_SLOT.orizontala };
+  }
+  return { x: pozitieUnit * PAS_SLOT.verticala, y: generatie * PAS_GENERATIE.verticala };
 }
 
 function NodBox({
@@ -84,18 +137,20 @@ function NodBox({
       sx={{
         width: BOX_W,
         height: inaltimeCasuta(mutatii.length),
-        borderRadius: 1,
+        borderRadius: 2,
         border: '2px solid',
         borderColor: SEX_CULOARE[sex] ?? SEX_CULOARE.NECUNOSCUT,
         bgcolor: 'background.paper',
+        boxShadow: 1,
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
-        px: 1,
+        px: 1.25,
         py: 0.5,
         cursor: 'pointer',
         overflow: 'hidden',
-        '&:hover': { bgcolor: 'action.hover' },
+        transition: 'box-shadow 0.15s ease, transform 0.15s ease',
+        '&:hover': { boxShadow: 4, transform: 'translateY(-1px)' },
       }}
     >
       <Typography variant="body2" noWrap sx={{ fontWeight: 600, lineHeight: 1.2 }}>
@@ -122,77 +177,115 @@ function NodBox({
   );
 }
 
-export function ArboreStramosi({
+export function ArboreGrafic({
   arbore,
+  mod,
+  orientare,
   onNodeClick,
 }: {
   arbore: ArboreGenealogicTip;
+  mod: 'stramosi' | 'descendenti';
+  orientare: OrientareArbore;
   onNodeClick: (id: string) => void;
 }) {
-  const radacina: NodStramos = {
-    ...arbore.pasare,
-    tata: arbore.stramosi.tata,
-    mama: arbore.stramosi.mama,
-  };
+  const { noduri, muchii, adancimeMaxima, latimeTotalaUnit, radacinaId } = useMemo(() => {
+    const radacina = construiesteRadacina(arbore, mod);
+    const noduriLocale: NodPozitionat[] = [];
+    const muchiiLocale: Muchie[] = [];
+    const latime = aseazaArbore(radacina, 0, 0, noduriLocale, muchiiLocale);
+    const adancime = noduriLocale.reduce((max, n) => Math.max(max, n.generatie), 0);
+    return {
+      noduri: noduriLocale,
+      muchii: muchiiLocale,
+      adancimeMaxima: adancime,
+      latimeTotalaUnit: latime,
+      radacinaId: radacina.id,
+    };
+  }, [arbore, mod]);
 
-  const noduri: NodPozitionat[] = [];
-  aplatizeaza(radacina, 0, 0, noduri);
+  const mapaNoduri = useMemo(() => new Map(noduri.map((n) => [n.id, n])), [noduri]);
 
-  // Layout-ul foloseste adancimea reala gasita in date, nu limita maxima ceruta
-  // (altfel un arbore cu doar 2 generatii cunoscute ar rezerva spatiu de scroll pentru 5).
-  const adancimeMaxima = noduri.reduce((max, n) => Math.max(max, n.generatie), 0);
-
-  const { y: subiectY, totalInaltime } = pozitie(0, 0, adancimeMaxima);
-  const latimeTotala = (adancimeMaxima + 1) * COL_WIDTH;
+  const latimeTotala =
+    orientare === 'orizontala'
+      ? (adancimeMaxima + 1) * PAS_GENERATIE.orizontala
+      : latimeTotalaUnit * PAS_SLOT.verticala;
+  const inaltimeTotala =
+    orientare === 'orizontala'
+      ? latimeTotalaUnit * PAS_SLOT.orizontala
+      : (adancimeMaxima + 1) * PAS_GENERATIE.verticala;
 
   const containerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
-    container.scrollTop = Math.max(0, subiectY - container.clientHeight / 2);
-  }, [subiectY, adancimeMaxima]);
+    const subiect = mapaNoduri.get(radacinaId);
+    if (!subiect) return;
+    const { x, y } = coordonate(subiect.generatie, subiect.pozitieUnit, orientare);
+    if (orientare === 'orizontala') {
+      container.scrollTop = Math.max(0, y - container.clientHeight / 2);
+      container.scrollLeft = 0;
+    } else {
+      container.scrollLeft = Math.max(0, x - container.clientWidth / 2);
+      container.scrollTop = 0;
+    }
+  }, [mapaNoduri, radacinaId, orientare]);
 
-  const linii: { x1: number; y1: number; x2: number; y2: number }[] = [];
-  for (const n of noduri) {
-    const { x, y } = pozitie(n.generatie, n.slot, adancimeMaxima);
-    if (n.areTata) {
-      const copil = pozitie(n.generatie + 1, n.slot * 2, adancimeMaxima);
-      linii.push({ x1: x + BOX_W, y1: y, x2: copil.x, y2: copil.y });
-    }
-    if (n.areMama) {
-      const copil = pozitie(n.generatie + 1, n.slot * 2 + 1, adancimeMaxima);
-      linii.push({ x1: x + BOX_W, y1: y, x2: copil.x, y2: copil.y });
-    }
-  }
+  const linii = useMemo(() => {
+    return muchii.map((m) => {
+      const parinte = mapaNoduri.get(m.parinteId)!;
+      const copil = mapaNoduri.get(m.copilId)!;
+      const pParinte = coordonate(parinte.generatie, parinte.pozitieUnit, orientare);
+      const pCopil = coordonate(copil.generatie, copil.pozitieUnit, orientare);
+      const hParinte = inaltimeCasuta(parinte.mutatii.length);
+      const hCopil = inaltimeCasuta(copil.mutatii.length);
+
+      if (orientare === 'orizontala') {
+        const x1 = pParinte.x + BOX_W;
+        const y1 = pParinte.y;
+        const x2 = pCopil.x;
+        const y2 = pCopil.y;
+        const mid = (x1 + x2) / 2;
+        return { d: `M ${x1},${y1} C ${mid},${y1} ${mid},${y2} ${x2},${y2}`, key: `${m.parinteId}-${m.copilId}` };
+      }
+      const x1 = pParinte.x;
+      const y1 = pParinte.y + hParinte;
+      const x2 = pCopil.x;
+      const y2 = pCopil.y;
+      const mid = (y1 + y2) / 2;
+      void hCopil;
+      return { d: `M ${x1},${y1} C ${x1},${mid} ${x2},${mid} ${x2},${y2}`, key: `${m.parinteId}-${m.copilId}` };
+    });
+  }, [muchii, mapaNoduri, orientare]);
 
   return (
-    <Box ref={containerRef} sx={{ overflow: 'auto', maxHeight: '60vh' }}>
-      <Box sx={{ position: 'relative', width: latimeTotala, height: totalInaltime }}>
+    <Box
+      ref={containerRef}
+      sx={{ overflow: 'auto', maxHeight: { xs: '70vh', sm: '65vh' }, borderRadius: 1 }}
+    >
+      <Box
+        sx={{
+          position: 'relative',
+          width: latimeTotala + BOX_W,
+          height: inaltimeTotala + BOX_H_MAX,
+          p: 2,
+        }}
+      >
         <svg
-          width={latimeTotala}
-          height={totalInaltime}
+          width={latimeTotala + BOX_W}
+          height={inaltimeTotala + BOX_H_MAX}
           style={{ position: 'absolute', top: 0, left: 0, pointerEvents: 'none' }}
         >
-          {linii.map((l, i) => (
-            <line
-              key={i}
-              x1={l.x1}
-              y1={l.y1}
-              x2={l.x2}
-              y2={l.y2}
-              stroke="currentColor"
-              strokeOpacity={0.35}
-              strokeWidth={1.5}
-            />
+          {linii.map((l) => (
+            <path key={l.key} d={l.d} fill="none" stroke="currentColor" strokeOpacity={0.35} strokeWidth={1.75} />
           ))}
         </svg>
         {noduri.map((n) => {
-          const { x, y } = pozitie(n.generatie, n.slot, adancimeMaxima);
+          const { x, y } = coordonate(n.generatie, n.pozitieUnit, orientare);
+          const h = inaltimeCasuta(n.mutatii.length);
+          const top = orientare === 'orizontala' ? y - h / 2 : y;
+          const left = orientare === 'orizontala' ? x : x - BOX_W / 2;
           return (
-            <Box
-              key={n.id}
-              sx={{ position: 'absolute', left: x, top: y - inaltimeCasuta(n.mutatii.length) / 2 }}
-            >
+            <Box key={n.id} sx={{ position: 'absolute', left, top }}>
               <NodBox
                 nrInel={n.nrInel}
                 rnc={n.rnc}
@@ -208,65 +301,25 @@ export function ArboreStramosi({
   );
 }
 
-export function ArboreDescendenti({
-  descendenti,
-  onNodeClick,
-}: {
-  descendenti: NodDescendent[];
-  onNodeClick: (id: string) => void;
-}) {
-  if (descendenti.length === 0) {
-    return (
-      <Typography variant="body2" color="text.secondary">
-        Niciun descendent inregistrat.
-      </Typography>
-    );
-  }
-
+export function LegendaArbore() {
   return (
-    <Box component="ul" sx={{ listStyle: 'none', m: 0, p: 0 }}>
-      {descendenti.map((n) => (
-        <RamuraDescendent key={n.id} nod={n} onNodeClick={onNodeClick} />
-      ))}
-    </Box>
-  );
-}
-
-function RamuraDescendent({
-  nod,
-  onNodeClick,
-}: {
-  nod: NodDescendent;
-  onNodeClick: (id: string) => void;
-}) {
-  return (
-    <Box component="li" sx={{ my: 0.5 }}>
-      <Box sx={{ display: 'inline-block' }}>
-        <NodBox
-          nrInel={nod.nrInel}
-          rnc={nod.rnc}
-          sex={nod.sex}
-          mutatii={nod.mutatii}
-          onClick={() => onNodeClick(nod.id)}
-        />
-      </Box>
-      {nod.copii.length > 0 && (
-        <Box
-          component="ul"
-          sx={{
-            listStyle: 'none',
-            m: 0,
-            pl: 3,
-            borderLeft: '2px solid',
-            borderColor: 'divider',
-            ml: 2,
-          }}
-        >
-          {nod.copii.map((c) => (
-            <RamuraDescendent key={c.id} nod={c} onNodeClick={onNodeClick} />
-          ))}
+    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 2 }}>
+      {(['MASCUL', 'FEMELA', 'NECUNOSCUT'] as const).map((sex) => (
+        <Box key={sex} sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+          <Box
+            sx={{
+              width: 14,
+              height: 14,
+              borderRadius: '50%',
+              border: '2px solid',
+              borderColor: SEX_CULOARE[sex],
+            }}
+          />
+          <Typography variant="caption" color="text.secondary">
+            {SEX_LABEL[sex]}
+          </Typography>
         </Box>
-      )}
+      ))}
     </Box>
   );
 }
