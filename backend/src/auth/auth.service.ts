@@ -47,12 +47,13 @@ export class AuthService {
       return { ferma, utilizator };
     });
 
-    return this.buildAuthResponse(utilizator.id, ferma.id, utilizator.email, utilizator.rol);
+    return this.buildAuthResponse(utilizator.id, ferma.id, utilizator.email, utilizator.rol, ferma.nume);
   }
 
   async login(dto: LoginDto) {
     const utilizator = await this.prisma.utilizator.findUnique({
       where: { email: dto.email },
+      include: { ferma: true },
     });
 
     if (!utilizator) {
@@ -69,15 +70,22 @@ export class AuthService {
       utilizator.fermaId,
       utilizator.email,
       utilizator.rol,
+      utilizator.ferma.nume,
     );
   }
 
-  private buildAuthResponse(userId: string, fermaId: string, email: string, rol: string) {
+  private buildAuthResponse(
+    userId: string,
+    fermaId: string,
+    email: string,
+    rol: string,
+    fermaNume: string,
+  ) {
     const payload: JwtPayload = { sub: userId, fermaId, email, rol };
 
     return {
       accessToken: this.jwtService.sign(payload),
-      utilizator: { id: userId, fermaId, email, rol },
+      utilizator: { id: userId, fermaId, email, rol, fermaNume },
     };
   }
 }

@@ -31,18 +31,37 @@ import {
   restoreBackup,
 } from '../api/backup';
 import { trimiteSugestie } from '../api/sugestii';
+import { actualizeazaFerma } from '../api/ferma';
 import type { BackupAutomatInfo } from '../types/backup';
+import { useAuth } from '../auth/AuthContext';
 import {
   CULORI_PRESTABILITE,
   PREFERINTE_IMPLICITE,
   usePreferinte,
 } from '../preferinte/PreferinteContext';
-import type { DensitateTabel, TemaMod } from '../preferinte/PreferinteContext';
+import type {
+  DensitateTabel,
+  MarimeText,
+  PaginaImplicita,
+  TemaMod,
+} from '../preferinte/PreferinteContext';
 
 const CUVANT_CONFIRMARE = 'STERGE';
 
+const PAGINI_IMPLICITE: { valoare: PaginaImplicita; label: string }[] = [
+  { valoare: '/', label: 'Dashboard' },
+  { valoare: '/pasari', label: 'Pasari' },
+  { valoare: '/perechi', label: 'Perechi' },
+  { valoare: '/statistici', label: 'Statistici' },
+];
+
 export function SetariPage() {
+  const { user, actualizeazaFermaNume } = useAuth();
   const { preferinte, actualizeazaPreferinte, reseteazaPreferinte } = usePreferinte();
+  const [numeFerma, setNumeFerma] = useState(user?.fermaNume ?? '');
+  const [seSalveazaNume, setSeSalveazaNume] = useState(false);
+  const [eroareNume, setEroareNume] = useState<string | null>(null);
+  const [numeSalvat, setNumeSalvat] = useState(false);
   const [seExportaBackup, setSeExportaBackup] = useState(false);
   const [fisierSelectat, setFisierSelectat] = useState<File | null>(null);
   const [dialogDeschis, setDialogDeschis] = useState(false);
@@ -67,6 +86,26 @@ export function SetariPage() {
         setBackupuriAuto([]);
       });
   }, []);
+
+  async function onSalveazaNumeFerma() {
+    const numeCurat = numeFerma.trim();
+    if (!numeCurat) return;
+    setSeSalveazaNume(true);
+    setEroareNume(null);
+    setNumeSalvat(false);
+    try {
+      const rezultat = await actualizeazaFerma(numeCurat);
+      actualizeazaFermaNume(rezultat.nume);
+      setNumeSalvat(true);
+    } catch (err: unknown) {
+      const mesaj =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+        'Salvarea a esuat';
+      setEroareNume(Array.isArray(mesaj) ? mesaj.join(', ') : mesaj);
+    } finally {
+      setSeSalveazaNume(false);
+    }
+  }
 
   async function onDescarcaBackup() {
     setSeExportaBackup(true);
@@ -140,6 +179,48 @@ export function SetariPage() {
       <Stack spacing={3}>
         <Card variant="outlined">
           <CardContent>
+            <Typography variant="h6" sx={{ mb: 1 }}>
+              Numele crescatoriei
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              Acest nume apare in antetul aplicatiei, in locul unde initial scria „AnimalTrack”.
+            </Typography>
+
+            {numeSalvat && (
+              <Alert severity="success" sx={{ mb: 2 }} onClose={() => setNumeSalvat(false)}>
+                Numele a fost actualizat.
+              </Alert>
+            )}
+            {eroareNume && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {eroareNume}
+              </Alert>
+            )}
+
+            <Stack direction="row" spacing={1.5} sx={{ flexWrap: 'wrap', rowGap: 1.5 }}>
+              <TextField
+                size="small"
+                value={numeFerma}
+                onChange={(e) => setNumeFerma(e.target.value)}
+                sx={{ minWidth: 240, flex: { xs: 1, sm: 'initial' } }}
+              />
+              <Button
+                variant="contained"
+                onClick={onSalveazaNumeFerma}
+                disabled={
+                  seSalveazaNume ||
+                  !numeFerma.trim() ||
+                  numeFerma.trim() === user?.fermaNume
+                }
+              >
+                Salveaza
+              </Button>
+            </Stack>
+          </CardContent>
+        </Card>
+
+        <Card variant="outlined">
+          <CardContent>
             <Stack
               direction="row"
               sx={{ justifyContent: 'space-between', alignItems: 'center', mb: 2 }}
@@ -151,7 +232,9 @@ export function SetariPage() {
                 disabled={
                   preferinte.tema === PREFERINTE_IMPLICITE.tema &&
                   preferinte.culoarePrincipala === PREFERINTE_IMPLICITE.culoarePrincipala &&
-                  preferinte.densitateTabele === PREFERINTE_IMPLICITE.densitateTabele
+                  preferinte.densitateTabele === PREFERINTE_IMPLICITE.densitateTabele &&
+                  preferinte.marimeText === PREFERINTE_IMPLICITE.marimeText &&
+                  preferinte.paginaImplicita === PREFERINTE_IMPLICITE.paginaImplicita
                 }
               >
                 Reseteaza la implicit
@@ -237,9 +320,40 @@ export function SetariPage() {
               exclusive
               value={preferinte.densitateTabele}
               onChange={(_e, v: DensitateTabel | null) => v && actualizeazaPreferinte({ densitateTabele: v })}
+              sx={{ mb: 3 }}
             >
               <ToggleButton value="compacta">Compacta</ToggleButton>
               <ToggleButton value="confortabila">Confortabila</ToggleButton>
+            </ToggleButtonGroup>
+
+            <Typography variant="subtitle2" sx={{ mb: 1 }}>
+              Marime text
+            </Typography>
+            <ToggleButtonGroup
+              size="small"
+              exclusive
+              value={preferinte.marimeText}
+              onChange={(_e, v: MarimeText | null) => v && actualizeazaPreferinte({ marimeText: v })}
+              sx={{ mb: 3 }}
+            >
+              <ToggleButton value="normal">Normal</ToggleButton>
+              <ToggleButton value="mare">Mare</ToggleButton>
+            </ToggleButtonGroup>
+
+            <Typography variant="subtitle2" sx={{ mb: 1 }}>
+              Pagina afisata dupa autentificare
+            </Typography>
+            <ToggleButtonGroup
+              size="small"
+              exclusive
+              value={preferinte.paginaImplicita}
+              onChange={(_e, v: PaginaImplicita | null) => v && actualizeazaPreferinte({ paginaImplicita: v })}
+            >
+              {PAGINI_IMPLICITE.map((p) => (
+                <ToggleButton key={p.valoare} value={p.valoare}>
+                  {p.label}
+                </ToggleButton>
+              ))}
             </ToggleButtonGroup>
           </CardContent>
         </Card>

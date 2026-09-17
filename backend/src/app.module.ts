@@ -13,6 +13,7 @@ import { CuibaritModule } from './cuibarit/cuibarit.module';
 import { StatisticiModule } from './statistici/statistici.module';
 import { BackupModule } from './backup/backup.module';
 import { SugestiiModule } from './sugestii/sugestii.module';
+import { FermaModule } from './ferma/ferma.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { SugestiiModule } from './sugestii/sugestii.module';
     StatisticiModule,
     BackupModule,
     SugestiiModule,
+    FermaModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

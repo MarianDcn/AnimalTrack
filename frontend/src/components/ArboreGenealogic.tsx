@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import type {
@@ -108,11 +108,23 @@ function aseazaArbore(
   return Math.max(cursor - start, 1);
 }
 
-function coordonate(generatie: number, pozitieUnit: number, orientare: OrientareArbore) {
+function coordonate(
+  generatie: number,
+  pozitieUnit: number,
+  orientare: OrientareArbore,
+  offsetGeneratie: number,
+  offsetPerpendicular: number,
+) {
   if (orientare === 'orizontala') {
-    return { x: generatie * PAS_GENERATIE.orizontala, y: pozitieUnit * PAS_SLOT.orizontala };
+    return {
+      x: offsetGeneratie + generatie * PAS_GENERATIE.orizontala,
+      y: offsetPerpendicular + pozitieUnit * PAS_SLOT.orizontala,
+    };
   }
-  return { x: pozitieUnit * PAS_SLOT.verticala, y: generatie * PAS_GENERATIE.verticala };
+  return {
+    x: offsetPerpendicular + pozitieUnit * PAS_SLOT.verticala,
+    y: generatie * PAS_GENERATIE.verticala,
+  };
 }
 
 function NodBox({
@@ -205,22 +217,57 @@ export function ArboreGrafic({
 
   const mapaNoduri = useMemo(() => new Map(noduri.map((n) => [n.id, n])), [noduri]);
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [offsetGeneratie, setOffsetGeneratie] = useState(0);
+  const [offsetPerpendicular, setOffsetPerpendicular] = useState(0);
+
+  const extindePerpendicular = latimeTotalaUnit * PAS_SLOT[orientare];
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    function actualizeazaOffsete() {
+      const cw = container!.clientWidth;
+      const ch = container!.clientHeight;
+      if (orientare === 'orizontala') {
+        // orizontal: subiectul (generatia 0) porneste din centrul ecranului;
+        // pe verticala (perpendicular), grupul de noduri e centrat daca incape.
+        setOffsetGeneratie(Math.max(0, cw / 2 - BOX_W / 2));
+        setOffsetPerpendicular(Math.max(0, (ch - extindePerpendicular) / 2));
+      } else {
+        // vertical: subiectul porneste din partea de sus (fara offset pe generatie);
+        // pe orizontala (perpendicular), grupul de noduri e centrat daca incape.
+        setOffsetGeneratie(0);
+        setOffsetPerpendicular(Math.max(0, (cw - extindePerpendicular) / 2));
+      }
+    }
+    actualizeazaOffsete();
+    const observer = new ResizeObserver(actualizeazaOffsete);
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, [orientare, extindePerpendicular]);
+
   const latimeTotala =
     orientare === 'orizontala'
-      ? (adancimeMaxima + 1) * PAS_GENERATIE.orizontala
-      : latimeTotalaUnit * PAS_SLOT.verticala;
+      ? offsetGeneratie + (adancimeMaxima + 1) * PAS_GENERATIE.orizontala
+      : offsetPerpendicular + extindePerpendicular;
   const inaltimeTotala =
     orientare === 'orizontala'
-      ? latimeTotalaUnit * PAS_SLOT.orizontala
+      ? offsetPerpendicular + extindePerpendicular
       : (adancimeMaxima + 1) * PAS_GENERATIE.verticala;
 
-  const containerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
     const subiect = mapaNoduri.get(radacinaId);
     if (!subiect) return;
-    const { x, y } = coordonate(subiect.generatie, subiect.pozitieUnit, orientare);
+    const { x, y } = coordonate(
+      subiect.generatie,
+      subiect.pozitieUnit,
+      orientare,
+      offsetGeneratie,
+      offsetPerpendicular,
+    );
     if (orientare === 'orizontala') {
       container.scrollTop = Math.max(0, y - container.clientHeight / 2);
       container.scrollLeft = 0;
@@ -228,14 +275,14 @@ export function ArboreGrafic({
       container.scrollLeft = Math.max(0, x - container.clientWidth / 2);
       container.scrollTop = 0;
     }
-  }, [mapaNoduri, radacinaId, orientare]);
+  }, [mapaNoduri, radacinaId, orientare, offsetGeneratie, offsetPerpendicular]);
 
   const linii = useMemo(() => {
     return muchii.map((m) => {
       const parinte = mapaNoduri.get(m.parinteId)!;
       const copil = mapaNoduri.get(m.copilId)!;
-      const pParinte = coordonate(parinte.generatie, parinte.pozitieUnit, orientare);
-      const pCopil = coordonate(copil.generatie, copil.pozitieUnit, orientare);
+      const pParinte = coordonate(parinte.generatie, parinte.pozitieUnit, orientare, offsetGeneratie, offsetPerpendicular);
+      const pCopil = coordonate(copil.generatie, copil.pozitieUnit, orientare, offsetGeneratie, offsetPerpendicular);
       const hParinte = inaltimeCasuta(parinte.mutatii.length);
       const hCopil = inaltimeCasuta(copil.mutatii.length);
 
@@ -255,7 +302,7 @@ export function ArboreGrafic({
       void hCopil;
       return { d: `M ${x1},${y1} C ${x1},${mid} ${x2},${mid} ${x2},${y2}`, key: `${m.parinteId}-${m.copilId}` };
     });
-  }, [muchii, mapaNoduri, orientare]);
+  }, [muchii, mapaNoduri, orientare, offsetGeneratie, offsetPerpendicular]);
 
   return (
     <Box
@@ -280,7 +327,7 @@ export function ArboreGrafic({
           ))}
         </svg>
         {noduri.map((n) => {
-          const { x, y } = coordonate(n.generatie, n.pozitieUnit, orientare);
+          const { x, y } = coordonate(n.generatie, n.pozitieUnit, orientare, offsetGeneratie, offsetPerpendicular);
           const h = inaltimeCasuta(n.mutatii.length);
           const top = orientare === 'orizontala' ? y - h / 2 : y;
           const left = orientare === 'orizontala' ? x : x - BOX_W / 2;

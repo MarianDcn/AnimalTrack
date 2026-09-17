@@ -52,6 +52,28 @@ const TOATE_SEXELE = Object.keys(SEX_LABEL) as SexPasare[];
 
 type CampSortare = 'nrInel' | 'dataEclozare' | null;
 
+interface FiltrePersistate {
+  statusuri: StatusPasare[];
+  sexe: SexPasare[];
+  mutatii: string[];
+  an: number | 'toate';
+  campSortare: CampSortare;
+  directieSortare: 'asc' | 'desc';
+}
+
+const CHEIE_FILTRE = 'animaltrack.pasariFiltre';
+
+function incarcaFiltre(): Partial<FiltrePersistate> {
+  try {
+    const bruta = localStorage.getItem(CHEIE_FILTRE);
+    return bruta ? (JSON.parse(bruta) as Partial<FiltrePersistate>) : {};
+  } catch {
+    return {};
+  }
+}
+
+const filtreInitiale = incarcaFiltre();
+
 export function PasariPage() {
   const navigate = useNavigate();
   const [pasari, setPasari] = useState<Pasare[] | null>(null);
@@ -60,15 +82,23 @@ export function PasariPage() {
   const [pasareEditata, setPasareEditata] = useState<Pasare | null>(null);
   const [seExporta, setSeExporta] = useState(false);
 
-  const [campSortare, setCampSortare] = useState<CampSortare>(null);
-  const [directieSortare, setDirectieSortare] = useState<'asc' | 'desc'>('asc');
-
-  const [anFiltrat, setAnFiltrat] = useState<number | 'toate'>('toate');
-  const [mutatiiFiltrate, setMutatiiFiltrate] = useState<Set<string>>(new Set());
-  const [statusuriFiltrate, setStatusuriFiltrate] = useState<Set<StatusPasare>>(
-    new Set(['ACTIVA']),
+  const [campSortare, setCampSortare] = useState<CampSortare>(
+    filtreInitiale.campSortare ?? null,
   );
-  const [sexeFiltrate, setSexeFiltrate] = useState<Set<SexPasare>>(new Set(TOATE_SEXELE));
+  const [directieSortare, setDirectieSortare] = useState<'asc' | 'desc'>(
+    filtreInitiale.directieSortare ?? 'asc',
+  );
+
+  const [anFiltrat, setAnFiltrat] = useState<number | 'toate'>(filtreInitiale.an ?? 'toate');
+  const [mutatiiFiltrate, setMutatiiFiltrate] = useState<Set<string>>(
+    new Set(filtreInitiale.mutatii ?? []),
+  );
+  const [statusuriFiltrate, setStatusuriFiltrate] = useState<Set<StatusPasare>>(
+    new Set(filtreInitiale.statusuri ?? ['ACTIVA']),
+  );
+  const [sexeFiltrate, setSexeFiltrate] = useState<Set<SexPasare>>(
+    new Set(filtreInitiale.sexe ?? TOATE_SEXELE),
+  );
 
   const [anchorAn, setAnchorAn] = useState<HTMLElement | null>(null);
   const [anchorMutatii, setAnchorMutatii] = useState<HTMLElement | null>(null);
@@ -87,6 +117,22 @@ export function PasariPage() {
   useEffect(() => {
     incarca();
   }, []);
+
+  useEffect(() => {
+    try {
+      const filtre: FiltrePersistate = {
+        statusuri: [...statusuriFiltrate],
+        sexe: [...sexeFiltrate],
+        mutatii: [...mutatiiFiltrate],
+        an: anFiltrat,
+        campSortare,
+        directieSortare,
+      };
+      localStorage.setItem(CHEIE_FILTRE, JSON.stringify(filtre));
+    } catch {
+      // localStorage indisponibil - filtrele nu se salveaza intre sesiuni
+    }
+  }, [statusuriFiltrate, sexeFiltrate, mutatiiFiltrate, anFiltrat, campSortare, directieSortare]);
 
   function onAdauga() {
     setPasareEditata(null);

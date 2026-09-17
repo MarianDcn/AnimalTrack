@@ -52,8 +52,21 @@ export function Header() {
           <MenuIcon />
         </IconButton>
 
-        <Typography variant="h6" sx={{ fontWeight: 700, whiteSpace: 'nowrap' }}>
-          AnimalTrack
+        <Typography
+          variant="h6"
+          component={RouterLink}
+          to="/"
+          sx={{
+            fontWeight: 700,
+            whiteSpace: 'nowrap',
+            color: 'inherit',
+            textDecoration: 'none',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            maxWidth: { xs: 140, sm: 260 },
+          }}
+        >
+          {user?.fermaNume || 'AnimalTrack'}
         </Typography>
 
         <Box sx={{ display: { xs: 'none', md: 'flex' } }}>

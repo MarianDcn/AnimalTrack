@@ -7,6 +7,7 @@ export interface AuthUser {
   fermaId: string;
   email: string;
   rol: string;
+  fermaNume: string;
 }
 
 interface AuthContextValue {
@@ -19,6 +20,7 @@ interface AuthContextValue {
     parola: string,
   ) => Promise<void>;
   logout: () => void;
+  actualizeazaFermaNume: (fermaNume: string) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -69,7 +71,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   }, []);
 
-  const value = useMemo(() => ({ user, login, register, logout }), [user, login, register, logout]);
+  const actualizeazaFermaNume = useCallback((fermaNume: string) => {
+    setUser((prev) => {
+      if (!prev) return prev;
+      const actualizat = { ...prev, fermaNume };
+      localStorage.setItem('utilizator', JSON.stringify(actualizat));
+      return actualizat;
+    });
+  }, []);
+
+  const value = useMemo(
+    () => ({ user, login, register, logout, actualizeazaFermaNume }),
+    [user, login, register, logout, actualizeazaFermaNume],
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

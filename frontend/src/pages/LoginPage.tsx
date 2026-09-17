@@ -9,9 +9,11 @@ import Paper from '@mui/material/Paper';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { useAuth } from '../auth/AuthContext';
+import { usePreferinte } from '../preferinte/PreferinteContext';
 
 export function LoginPage() {
   const { login } = useAuth();
+  const { preferinte } = usePreferinte();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [parola, setParola] = useState('');
@@ -24,7 +26,7 @@ export function LoginPage() {
     setSeIncarca(true);
     try {
       await login(email, parola);
-      navigate('/');
+      navigate(preferinte.paginaImplicita);
     } catch {
       setEroare('Email sau parola incorecte');
     } finally {

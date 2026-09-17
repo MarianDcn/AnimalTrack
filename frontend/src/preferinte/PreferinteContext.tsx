@@ -6,17 +6,23 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 
 export type TemaMod = 'deschis' | 'intunecat' | 'automat';
 export type DensitateTabel = 'compacta' | 'confortabila';
+export type MarimeText = 'normal' | 'mare';
+export type PaginaImplicita = '/' | '/pasari' | '/perechi' | '/statistici';
 
 export interface PreferinteInterfata {
   tema: TemaMod;
   culoarePrincipala: string;
   densitateTabele: DensitateTabel;
+  marimeText: MarimeText;
+  paginaImplicita: PaginaImplicita;
 }
 
 export const PREFERINTE_IMPLICITE: PreferinteInterfata = {
   tema: 'deschis',
   culoarePrincipala: '#2e7d32',
   densitateTabele: 'compacta',
+  marimeText: 'normal',
+  paginaImplicita: '/',
 };
 
 export const CULORI_PRESTABILITE = [
@@ -93,6 +99,9 @@ export function PreferinteProvider({ children }: { children: ReactNode }) {
           secondary: { main: '#ff8f00' },
         },
         shape: { borderRadius: 8 },
+        typography: {
+          fontSize: preferinte.marimeText === 'mare' ? 16 : 14,
+        },
         components: {
           MuiTable: {
             defaultProps: {
@@ -101,7 +110,7 @@ export function PreferinteProvider({ children }: { children: ReactNode }) {
           },
         },
       }),
-    [modEfectiv, preferinte.culoarePrincipala, preferinte.densitateTabele],
+    [modEfectiv, preferinte.culoarePrincipala, preferinte.densitateTabele, preferinte.marimeText],
   );
 
   return (
