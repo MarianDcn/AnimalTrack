@@ -17,7 +17,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import { useAuth } from '../auth/AuthContext';
 import { QuickSearch } from './QuickSearch';
 
-const LINKURI = [
+const LINKURI_DE_BAZA = [
   { to: '/', label: 'Dashboard' },
   { to: '/pasari', label: 'Pasari' },
   { to: '/perechi', label: 'Perechi' },
@@ -30,6 +30,10 @@ export function Header() {
   const navigate = useNavigate();
   const location = useLocation();
   const [drawerDeschis, setDrawerDeschis] = useState(false);
+
+  const linkuri = user?.esteAdmin
+    ? [...LINKURI_DE_BAZA, { to: '/sugestii-primite', label: 'Sugestii primite' }]
+    : LINKURI_DE_BAZA;
 
   function esteActiv(to: string) {
     return to === '/' ? location.pathname === '/' : location.pathname.startsWith(to);
@@ -70,7 +74,7 @@ export function Header() {
         </Typography>
 
         <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-          {LINKURI.map((l) => (
+          {linkuri.map((l) => (
             <Button
               key={l.to}
               component={RouterLink}
@@ -111,7 +115,7 @@ export function Header() {
           </Box>
           <Divider />
           <List>
-            {LINKURI.map((l) => (
+            {linkuri.map((l) => (
               <ListItemButton
                 key={l.to}
                 component={RouterLink}

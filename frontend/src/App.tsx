@@ -10,6 +10,7 @@ import { PerechiPage } from './pages/PerechiPage';
 import { PerecheDetailPage } from './pages/PerecheDetailPage';
 import { StatisticiPage } from './pages/StatisticiPage';
 import { SetariPage } from './pages/SetariPage';
+import { SugestiiPrimitePage } from './pages/SugestiiPrimitePage';
 
 export function App() {
   return (
@@ -85,6 +86,17 @@ export function App() {
           <RequireAuth>
             <AppLayout>
               <SetariPage />
+            </AppLayout>
+          </RequireAuth>
+        }
+      />
+
+      <Route
+        path="/sugestii-primite"
+        element={
+          <RequireAuth>
+            <AppLayout>
+              <SugestiiPrimitePage />
             </AppLayout>
           </RequireAuth>
         }

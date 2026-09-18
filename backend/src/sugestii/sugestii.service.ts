@@ -11,4 +11,14 @@ export class SugestiiService {
       data: { fermaId, utilizatorId, mesaj: dto.mesaj },
     });
   }
+
+  findAll() {
+    return this.prisma.sugestie.findMany({
+      orderBy: { dataCreare: 'desc' },
+      include: {
+        ferma: { select: { nume: true } },
+        utilizator: { select: { email: true } },
+      },
+    });
+  }
 }

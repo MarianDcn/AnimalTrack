@@ -71,6 +71,7 @@ model Utilizator {
   email      String        @unique
   parolaHash String        @map("parola_hash")
   rol        RolUtilizator @default(ADMIN)
+  preferinte Json?
   dataCreare DateTime      @default(now()) @map("data_creare")
 
   ferma    Ferma      @relation(fields: [fermaId], references: [id], onDelete: Cascade)

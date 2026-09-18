@@ -8,12 +8,12 @@ import { PreferinteProvider } from './preferinte/PreferinteContext.tsx';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <PreferinteProvider>
-      <BrowserRouter>
-        <AuthProvider>
+    <BrowserRouter>
+      <AuthProvider>
+        <PreferinteProvider>
           <App />
-        </AuthProvider>
-      </BrowserRouter>
-    </PreferinteProvider>
+        </PreferinteProvider>
+      </AuthProvider>
+    </BrowserRouter>
   </StrictMode>,
 );

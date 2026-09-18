@@ -1,4 +1,5 @@
 import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
@@ -14,6 +15,7 @@ export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
+    private readonly config: ConfigService,
   ) {}
 
   async register(dto: RegisterDto) {
@@ -82,10 +84,11 @@ export class AuthService {
     fermaNume: string,
   ) {
     const payload: JwtPayload = { sub: userId, fermaId, email, rol };
+    const esteAdmin = email === this.config.get<string>('ADMIN_EMAIL');
 
     return {
       accessToken: this.jwtService.sign(payload),
-      utilizator: { id: userId, fermaId, email, rol, fermaNume },
+      utilizator: { id: userId, fermaId, email, rol, fermaNume, esteAdmin },
     };
   }
 }

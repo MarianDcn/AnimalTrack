@@ -8,6 +8,7 @@ export interface AuthUser {
   email: string;
   rol: string;
   fermaNume: string;
+  esteAdmin: boolean;
 }
 
 interface AuthContextValue {

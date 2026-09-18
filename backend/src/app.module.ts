@@ -14,6 +14,7 @@ import { StatisticiModule } from './statistici/statistici.module';
 import { BackupModule } from './backup/backup.module';
 import { SugestiiModule } from './sugestii/sugestii.module';
 import { FermaModule } from './ferma/ferma.module';
+import { PreferinteModule } from './preferinte/preferinte.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { FermaModule } from './ferma/ferma.module';
     BackupModule,
     SugestiiModule,
     FermaModule,
+    PreferinteModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
