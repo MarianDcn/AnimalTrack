@@ -16,9 +16,11 @@ import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import CloseIcon from '@mui/icons-material/Close';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import ViewStreamIcon from '@mui/icons-material/ViewStream';
 import ViewWeekIcon from '@mui/icons-material/ViewWeek';
 import { getArbore } from '../api/arbore';
+import { exportArborePdf } from '../api/pasari';
 import type { ArboreGenealogic as ArboreGenealogicTip } from '../types/arbore';
 import { ArboreGrafic, LegendaArbore } from './ArboreGenealogic';
 import type { OrientareArbore } from './ArboreGenealogic';
@@ -52,6 +54,7 @@ export function ArboreGenealogicDialog({
   const [eroare, setEroare] = useState<string | null>(null);
   const [tab, setTab] = useState<'stramosi' | 'descendenti'>('stramosi');
   const [orientare, setOrientare] = useState<OrientareArbore>(() => orientareInitiala(ecranIngust));
+  const [seExportaPdf, setSeExportaPdf] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -77,6 +80,15 @@ export function ArboreGenealogicDialog({
     }
   }
 
+  async function onExportaPdf() {
+    setSeExportaPdf(true);
+    try {
+      await exportArborePdf(pasareId, tab);
+    } finally {
+      setSeExportaPdf(false);
+    }
+  }
+
   return (
     <Dialog open={open} onClose={onClose} fullScreen>
       <AppBar position="static" color="primary">
@@ -84,6 +96,17 @@ export function ArboreGenealogicDialog({
           <Typography variant="h6" sx={{ flexGrow: 1 }} noWrap>
             {arbore ? `Arbore genealogic — ${arbore.pasare.nrInel}` : 'Arbore genealogic'}
           </Typography>
+          <Tooltip title="Descarca arborele ca PDF (util la vanzare, ca dovada de pedigree)">
+            <span>
+              <IconButton
+                color="inherit"
+                onClick={onExportaPdf}
+                disabled={!arbore || seExportaPdf}
+              >
+                <FileDownloadIcon />
+              </IconButton>
+            </span>
+          </Tooltip>
           <IconButton color="inherit" onClick={onClose}>
             <CloseIcon />
           </IconButton>

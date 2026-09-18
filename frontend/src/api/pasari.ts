@@ -48,6 +48,17 @@ export async function exportPasarePdf(id: string): Promise<void> {
   descarcaRaspuns(response);
 }
 
+export async function exportArborePdf(
+  id: string,
+  mod: 'stramosi' | 'descendenti',
+): Promise<void> {
+  const response = await apiClient.get(`/pasari/${id}/export-arbore-pdf`, {
+    params: { mod },
+    responseType: 'blob',
+  });
+  descarcaRaspuns(response);
+}
+
 export async function exportPasariExcel(): Promise<void> {
   const response = await apiClient.get('/pasari/export-excel', { responseType: 'blob' });
   descarcaRaspuns(response);
