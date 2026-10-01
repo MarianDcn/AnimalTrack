@@ -21,11 +21,7 @@ const SEX_LABEL: Record<string, string> = {
   NECUNOSCUT: 'Necunoscut',
 };
 
-const SEX_CULOARE: Record<string, string> = {
-  MASCUL: '#1565c0',
-  FEMELA: '#ad1457',
-  NECUNOSCUT: '#757575',
-};
+const CULOARE_CASUTA = '#555555';
 
 function formatData(d: Date): string {
   return `${d.getDate().toString().padStart(2, '0')}.${(d.getMonth() + 1).toString().padStart(2, '0')}.${d.getFullYear()}`;
@@ -138,7 +134,7 @@ export class PasariExportService {
     const adancimeMaxima = noduri.reduce((max, n) => Math.max(max, n.generatie), 0);
     const mapaNoduri = new Map(noduri.map((n) => [n.id, n]));
 
-    const ANTET_H = 90;
+    const ANTET_H = 60;
     const MARGINE = 40;
     const latimeArbore = adancimeMaxima * PAS_GENERATIE + BOX_W;
     const inaltimeArbore = latimeTotalaUnit * PAS_SLOT;
@@ -153,23 +149,7 @@ export class PasariExportService {
     doc.fontSize(11).fillColor('#555').text(`${titluMod} - generat la ${formatData(new Date())}`);
     doc.fillColor('black');
 
-    // Legenda
-    const legendaY = doc.y + 10;
-    let legendaX = MARGINE;
-    for (const sex of ['MASCUL', 'FEMELA', 'NECUNOSCUT'] as const) {
-      doc
-        .save()
-        .lineWidth(1.5)
-        .strokeColor(SEX_CULOARE[sex])
-        .circle(legendaX + 5, legendaY + 5, 5)
-        .stroke()
-        .restore();
-      doc.fontSize(9).fillColor('#555').text(SEX_LABEL[sex], legendaX + 16, legendaY);
-      legendaX += 90;
-    }
-    doc.fillColor('black');
-
-    const originY = legendaY + 25;
+    const originY = doc.y + 25;
 
     for (const m of muchii) {
       const parinte = mapaNoduri.get(m.parinteId)!;
@@ -180,13 +160,12 @@ export class PasariExportService {
       const y1 = originY + pParinte.y;
       const x2 = MARGINE + pCopil.x;
       const y2 = originY + pCopil.y;
-      const mid = (x1 + x2) / 2;
       doc
         .save()
         .lineWidth(1.25)
         .strokeColor('#999999')
         .moveTo(x1, y1)
-        .bezierCurveTo(mid, y1, mid, y2, x2, y2)
+        .lineTo(x2, y2)
         .stroke()
         .restore();
     }
@@ -200,7 +179,7 @@ export class PasariExportService {
       doc
         .save()
         .lineWidth(1.5)
-        .strokeColor(SEX_CULOARE[n.sex] ?? SEX_CULOARE.NECUNOSCUT)
+        .strokeColor(CULOARE_CASUTA)
         .roundedRect(boxX, boxY, BOX_W, h, 4)
         .stroke()
         .restore();

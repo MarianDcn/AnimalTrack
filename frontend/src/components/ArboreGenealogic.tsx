@@ -28,18 +28,6 @@ const PAS_SLOT: Record<OrientareArbore, number> = {
   verticala: BOX_W + SLOT_GAP,
 };
 
-const SEX_CULOARE: Record<string, string> = {
-  MASCUL: '#1565c0',
-  FEMELA: '#ad1457',
-  NECUNOSCUT: '#757575',
-};
-
-const SEX_LABEL: Record<string, string> = {
-  MASCUL: 'Mascul',
-  FEMELA: 'Femela',
-  NECUNOSCUT: 'Necunoscut',
-};
-
 interface NodCuCopii extends NodArbore {
   copii: NodCuCopii[];
 }
@@ -130,13 +118,11 @@ function coordonate(
 function NodBox({
   nrInel,
   rnc,
-  sex,
   mutatii,
   onClick,
 }: {
   nrInel: string;
   rnc: string | null;
-  sex: string;
   mutatii: string[];
   onClick: () => void;
 }) {
@@ -151,7 +137,7 @@ function NodBox({
         height: inaltimeCasuta(mutatii.length),
         borderRadius: 2,
         border: '2px solid',
-        borderColor: SEX_CULOARE[sex] ?? SEX_CULOARE.NECUNOSCUT,
+        borderColor: 'text.secondary',
         bgcolor: 'background.paper',
         boxShadow: 1,
         display: 'flex',
@@ -284,23 +270,23 @@ export function ArboreGrafic({
       const pParinte = coordonate(parinte.generatie, parinte.pozitieUnit, orientare, offsetGeneratie, offsetPerpendicular);
       const pCopil = coordonate(copil.generatie, copil.pozitieUnit, orientare, offsetGeneratie, offsetPerpendicular);
       const hParinte = inaltimeCasuta(parinte.mutatii.length);
-      const hCopil = inaltimeCasuta(copil.mutatii.length);
 
       if (orientare === 'orizontala') {
-        const x1 = pParinte.x + BOX_W;
-        const y1 = pParinte.y;
-        const x2 = pCopil.x;
-        const y2 = pCopil.y;
-        const mid = (x1 + x2) / 2;
-        return { d: `M ${x1},${y1} C ${mid},${y1} ${mid},${y2} ${x2},${y2}`, key: `${m.parinteId}-${m.copilId}` };
+        return {
+          x1: pParinte.x + BOX_W,
+          y1: pParinte.y,
+          x2: pCopil.x,
+          y2: pCopil.y,
+          key: `${m.parinteId}-${m.copilId}`,
+        };
       }
-      const x1 = pParinte.x;
-      const y1 = pParinte.y + hParinte;
-      const x2 = pCopil.x;
-      const y2 = pCopil.y;
-      const mid = (y1 + y2) / 2;
-      void hCopil;
-      return { d: `M ${x1},${y1} C ${x1},${mid} ${x2},${mid} ${x2},${y2}`, key: `${m.parinteId}-${m.copilId}` };
+      return {
+        x1: pParinte.x,
+        y1: pParinte.y + hParinte,
+        x2: pCopil.x,
+        y2: pCopil.y,
+        key: `${m.parinteId}-${m.copilId}`,
+      };
     });
   }, [muchii, mapaNoduri, orientare, offsetGeneratie, offsetPerpendicular]);
 
@@ -323,7 +309,16 @@ export function ArboreGrafic({
           style={{ position: 'absolute', top: 0, left: 0, pointerEvents: 'none' }}
         >
           {linii.map((l) => (
-            <path key={l.key} d={l.d} fill="none" stroke="currentColor" strokeOpacity={0.35} strokeWidth={1.75} />
+            <line
+              key={l.key}
+              x1={l.x1}
+              y1={l.y1}
+              x2={l.x2}
+              y2={l.y2}
+              stroke="currentColor"
+              strokeOpacity={0.35}
+              strokeWidth={1.75}
+            />
           ))}
         </svg>
         {noduri.map((n) => {
@@ -336,7 +331,6 @@ export function ArboreGrafic({
               <NodBox
                 nrInel={n.nrInel}
                 rnc={n.rnc}
-                sex={n.sex}
                 mutatii={n.mutatii}
                 onClick={() => onNodeClick(n.id)}
               />
@@ -344,29 +338,6 @@ export function ArboreGrafic({
           );
         })}
       </Box>
-    </Box>
-  );
-}
-
-export function LegendaArbore() {
-  return (
-    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 2 }}>
-      {(['MASCUL', 'FEMELA', 'NECUNOSCUT'] as const).map((sex) => (
-        <Box key={sex} sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-          <Box
-            sx={{
-              width: 14,
-              height: 14,
-              borderRadius: '50%',
-              border: '2px solid',
-              borderColor: SEX_CULOARE[sex],
-            }}
-          />
-          <Typography variant="caption" color="text.secondary">
-            {SEX_LABEL[sex]}
-          </Typography>
-        </Box>
-      ))}
     </Box>
   );
 }

@@ -22,7 +22,7 @@ import ViewWeekIcon from '@mui/icons-material/ViewWeek';
 import { getArbore } from '../api/arbore';
 import { exportArborePdf } from '../api/pasari';
 import type { ArboreGenealogic as ArboreGenealogicTip } from '../types/arbore';
-import { ArboreGrafic, LegendaArbore } from './ArboreGenealogic';
+import { ArboreGrafic } from './ArboreGenealogic';
 import type { OrientareArbore } from './ArboreGenealogic';
 
 const GENERATII_SUS = 5;
@@ -158,10 +158,7 @@ export function ArboreGenealogicDialog({
         {!arbore && !eroare && <Skeleton variant="rounded" height={300} />}
 
         {arbore && (
-          <>
-            <LegendaArbore />
-            <ArboreGrafic arbore={arbore} mod={tab} orientare={orientare} onNodeClick={onNodeClick} />
-          </>
+          <ArboreGrafic arbore={arbore} mod={tab} orientare={orientare} onNodeClick={onNodeClick} />
         )}
       </Box>
     </Dialog>
