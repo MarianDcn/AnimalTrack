@@ -134,7 +134,7 @@ export class PasariExportService {
     const adancimeMaxima = noduri.reduce((max, n) => Math.max(max, n.generatie), 0);
     const mapaNoduri = new Map(noduri.map((n) => [n.id, n]));
 
-    const ANTET_H = 60;
+    const ANTET_H = 40;
     const MARGINE = 40;
     const latimeArbore = adancimeMaxima * PAS_GENERATIE + BOX_W;
     const inaltimeArbore = latimeTotalaUnit * PAS_SLOT;
@@ -144,10 +144,7 @@ export class PasariExportService {
       margin: MARGINE,
     });
 
-    const titluMod = mod === 'descendenti' ? 'Descendenti' : 'Stramosi';
     doc.fontSize(18).text(`Arbore genealogic - ${arbore.pasare.nrInel}`, { underline: true });
-    doc.fontSize(11).fillColor('#555').text(`${titluMod} - generat la ${formatData(new Date())}`);
-    doc.fillColor('black');
 
     const originY = doc.y + 25;
 
