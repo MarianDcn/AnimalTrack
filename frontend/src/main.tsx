@@ -5,6 +5,7 @@ import './index.css';
 import { App } from './App.tsx';
 import { AuthProvider } from './auth/AuthContext.tsx';
 import { PreferinteProvider } from './preferinte/PreferinteContext.tsx';
+import { ActualizarePWA } from './pwa/ActualizarePWA.tsx';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -12,6 +13,7 @@ createRoot(document.getElementById('root')!).render(
       <AuthProvider>
         <PreferinteProvider>
           <App />
+          <ActualizarePWA />
         </PreferinteProvider>
       </AuthProvider>
     </BrowserRouter>
